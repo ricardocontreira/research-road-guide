@@ -7,6 +7,8 @@ export interface Project {
   area: string;
   objectives: string;
   literature: string;
+  abstractPT: string;
+  abstractEN: string;
   introduction: string;
   methodology: string;
   results: string;
@@ -33,6 +35,8 @@ const mockProjects: Project[] = [
     area: "Ciências Humanas",
     objectives: "Analisar a adoção de ferramentas de IA em universidades públicas e privadas do Brasil.",
     literature: "A literatura sobre IA na educação tem crescido exponencialmente...",
+    abstractPT: "",
+    abstractEN: "",
     introduction: "A inteligência artificial tem revolucionado diversos setores da sociedade...",
     methodology: "",
     results: "",
@@ -53,6 +57,8 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
       area,
       objectives: "",
       literature: "",
+      abstractPT: "",
+      abstractEN: "",
       introduction: "",
       methodology: "",
       results: "",
@@ -74,10 +80,11 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
 
   const getProjectProgress = (project: Project): number => {
     let completed = 0;
-    let total = 5; // Configuration, Objectives, Introduction, Methodology, Results
+    let total = 6; // Configuration, Objectives, Abstract, Introduction, Methodology, Results
     
     if (project.title && project.premise && project.area) completed++;
     if (project.objectives && project.literature) completed++;
+    if (project.abstractPT || project.abstractEN) completed++;
     if (project.introduction) completed++;
     if (project.methodology) completed++;
     if (project.results) completed++;

@@ -1,16 +1,25 @@
 import { Project } from "@/contexts/ProjectContext";
-import { Check, Circle } from "lucide-react";
+import { Check, Circle, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useNavigate } from "react-router-dom";
 
 interface Step {
   id: string;
   label: string;
+  icon?: React.ReactNode;
   section?: "introduction" | "methodology" | "results";
+  route?: string;
 }
 
 const steps: Step[] = [
   { id: "config", label: "Configuração do Projeto" },
   { id: "objectives", label: "Objetivos e Revisão" },
+  { 
+    id: "abstract", 
+    label: "Resumo", 
+    icon: <FileText className="w-4 h-4" />,
+    route: "/project/abstract" 
+  },
   { id: "introduction", label: "Introdução", section: "introduction" },
   { id: "methodology", label: "Metodologia", section: "methodology" },
   { id: "results", label: "Resultados", section: "results" },
@@ -27,12 +36,16 @@ export default function ProgressSidebar({
   currentSection,
   onSectionChange,
 }: ProgressSidebarProps) {
+  const navigate = useNavigate();
+
   const isStepComplete = (stepId: string): boolean => {
     switch (stepId) {
       case "config":
         return !!(project.title && project.premise && project.area);
       case "objectives":
         return !!(project.objectives && project.literature);
+      case "abstract":
+        return !!(project.abstractPT || project.abstractEN);
       case "introduction":
         return !!project.introduction;
       case "methodology":
@@ -42,6 +55,23 @@ export default function ProgressSidebar({
       default:
         return false;
     }
+  };
+
+  const isStepEnabled = (step: Step, stepIndex: number): boolean => {
+    // Sempre permite Config e Objectives
+    if (stepIndex <= 1) return true;
+    
+    // Abstract requer objectives completo
+    if (step.id === "abstract") {
+      return isStepComplete("objectives");
+    }
+    
+    // Introduction, Methodology, Results requerem abstract completo
+    if (["introduction", "methodology", "results"].includes(step.id)) {
+      return isStepComplete("abstract");
+    }
+    
+    return true;
   };
 
   const isStepCurrent = (step: Step): boolean => {
@@ -56,17 +86,22 @@ export default function ProgressSidebar({
           {steps.map((step, index) => {
             const isComplete = isStepComplete(step.id);
             const isCurrent = isStepCurrent(step);
-            const isClickable = !!step.section;
+            const isEnabled = isStepEnabled(step, index);
+            const isClickable = (!!step.section || !!step.route) && isEnabled;
 
             return (
               <button
                 key={step.id}
-                onClick={() => step.section && onSectionChange(step.section)}
+                onClick={() => {
+                  if (step.section) onSectionChange(step.section);
+                  if (step.route) navigate(step.route);
+                }}
                 disabled={!isClickable}
                 className={cn(
                   "w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-left transition-colors",
                   isClickable && "hover:bg-accent cursor-pointer",
                   !isClickable && "cursor-default",
+                  !isEnabled && "opacity-50 cursor-not-allowed",
                   isCurrent && "bg-primary/10 text-primary"
                 )}
               >
