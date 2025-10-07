@@ -3,9 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { useProject } from "@/contexts/ProjectContext";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { RichTextEditor } from "@/components/RichTextEditor";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Save } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 
 export default function ProjectSetup() {
   const { currentProject, updateProject } = useProject();
@@ -98,12 +98,11 @@ export default function ProjectSetup() {
             <p className="text-sm text-muted-foreground">
               Descreva o que você pretende alcançar com esta pesquisa
             </p>
-            <Textarea
-              id="objectives"
-              placeholder="Liste os objetivos gerais e específicos do seu trabalho..."
+            <RichTextEditor
               value={objectives}
-              onChange={(e) => setObjectives(e.target.value)}
-              rows={8}
+              onChange={setObjectives}
+              placeholder="Liste os objetivos gerais e específicos do seu trabalho..."
+              minHeight="200px"
               className="font-serif text-base"
             />
             <p className="text-xs text-muted-foreground text-right">
@@ -118,12 +117,11 @@ export default function ProjectSetup() {
             <p className="text-sm text-muted-foreground">
               Contextualize seu trabalho dentro do campo de estudo
             </p>
-            <Textarea
-              id="literature"
-              placeholder="Apresente os principais autores e conceitos que fundamentam sua pesquisa..."
+            <RichTextEditor
               value={literature}
-              onChange={(e) => setLiterature(e.target.value)}
-              rows={10}
+              onChange={setLiterature}
+              placeholder="Apresente os principais autores e conceitos que fundamentam sua pesquisa..."
+              minHeight="250px"
               className="font-serif text-base"
             />
             <p className="text-xs text-muted-foreground text-right">

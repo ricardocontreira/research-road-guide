@@ -5,7 +5,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import ProgressSidebar from "@/components/ProgressSidebar";
 import SuggestionPanel from "@/components/SuggestionPanel";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
+import { RichTextEditor } from "@/components/RichTextEditor";
 import { ArrowLeft, FileDown } from "lucide-react";
 
 type Section = "introduction" | "methodology" | "results";
@@ -116,11 +116,12 @@ export default function ProjectEditor() {
                 </p>
               </div>
 
-              <Textarea
+              <RichTextEditor
                 value={content}
-                onChange={(e) => setContent(e.target.value)}
+                onChange={setContent}
                 placeholder={sectionPlaceholders[currentSection]}
-                className="min-h-[600px] font-serif text-[17px] leading-relaxed border-0 focus-visible:ring-0 shadow-none resize-none"
+                minHeight="600px"
+                className="font-serif text-[17px] leading-relaxed border-0"
               />
 
               <div className="mt-4 flex items-center justify-between text-sm text-muted-foreground">
