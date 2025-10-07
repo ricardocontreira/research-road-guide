@@ -2,10 +2,10 @@ import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
 import Link from '@tiptap/extension-link';
-import { Table } from '@tiptap/extension-table';
-import { TableRow } from '@tiptap/extension-table-row';
-import { TableCell } from '@tiptap/extension-table-cell';
-import { TableHeader } from '@tiptap/extension-table-header';
+import * as TableExtension from '@tiptap/extension-table';
+import * as TableRowExtension from '@tiptap/extension-table-row';
+import * as TableCellExtension from '@tiptap/extension-table-cell';
+import * as TableHeaderExtension from '@tiptap/extension-table-header';
 import Image from '@tiptap/extension-image';
 import TextAlign from '@tiptap/extension-text-align';
 import Heading from '@tiptap/extension-heading';
@@ -52,12 +52,12 @@ export function RichTextEditor({
         types: ['heading', 'paragraph'],
         alignments: ['left', 'center', 'right', 'justify'],
       }),
-      Table.configure({
+      TableExtension.Table.configure({
         resizable: true,
       }),
-      TableRow,
-      TableCell,
-      TableHeader,
+      TableRowExtension.TableRow,
+      TableCellExtension.TableCell,
+      TableHeaderExtension.TableHeader,
       Image.configure({
         inline: true,
         allowBase64: true,
