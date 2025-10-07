@@ -1,6 +1,22 @@
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
-import { Bold, Italic, List, ListOrdered } from 'lucide-react';
+import Underline from '@tiptap/extension-underline';
+import Link from '@tiptap/extension-link';
+import { Table } from '@tiptap/extension-table';
+import { TableRow } from '@tiptap/extension-table-row';
+import { TableCell } from '@tiptap/extension-table-cell';
+import { TableHeader } from '@tiptap/extension-table-header';
+import Image from '@tiptap/extension-image';
+import TextAlign from '@tiptap/extension-text-align';
+import Heading from '@tiptap/extension-heading';
+import { 
+  Bold, Italic, List, ListOrdered,
+  Underline as UnderlineIcon, Strikethrough,
+  Heading1, Heading2, Heading3,
+  Link as LinkIcon,
+  Table as TableIcon,
+  AlignLeft, AlignCenter, AlignJustify
+} from 'lucide-react';
 import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
 
@@ -20,12 +36,38 @@ export function RichTextEditor({
   minHeight = "200px"
 }: RichTextEditorProps) {
   const editor = useEditor({
-    extensions: [StarterKit],
+    extensions: [
+      StarterKit.configure({
+        heading: false,
+      }),
+      Heading.configure({
+        levels: [1, 2, 3],
+      }),
+      Underline,
+      Link.configure({
+        openOnClick: false,
+        autolink: true,
+      }),
+      TextAlign.configure({
+        types: ['heading', 'paragraph'],
+        alignments: ['left', 'center', 'right', 'justify'],
+      }),
+      Table.configure({
+        resizable: true,
+      }),
+      TableRow,
+      TableCell,
+      TableHeader,
+      Image.configure({
+        inline: true,
+        allowBase64: true,
+      }),
+    ],
     content: value,
     editorProps: {
       attributes: {
         class: cn(
-          'prose prose-sm max-w-none focus:outline-none min-h-[' + minHeight + '] p-4',
+          'prose prose-sm max-w-none focus:outline-none min-h-[' + minHeight + '] p-4 prose-table:border-collapse prose-td:border prose-td:p-2 prose-th:border prose-th:p-2 prose-th:bg-muted',
           className
         ),
       },
@@ -41,7 +83,8 @@ export function RichTextEditor({
 
   return (
     <div className="border border-input rounded-md bg-background">
-      <div className="border-b border-border p-2 flex gap-1 flex-wrap">
+      <div className="border-b border-border p-2 flex gap-1 flex-wrap overflow-x-auto">
+        {/* Formatação Básica */}
         <Button
           type="button"
           size="sm"
@@ -63,6 +106,59 @@ export function RichTextEditor({
         <Button
           type="button"
           size="sm"
+          variant={editor.isActive('underline') ? 'secondary' : 'ghost'}
+          onClick={() => editor.chain().focus().toggleUnderline().run()}
+          className="h-8 px-2"
+        >
+          <UnderlineIcon className="h-4 w-4" />
+        </Button>
+        <Button
+          type="button"
+          size="sm"
+          variant={editor.isActive('strike') ? 'secondary' : 'ghost'}
+          onClick={() => editor.chain().focus().toggleStrike().run()}
+          className="h-8 px-2"
+        >
+          <Strikethrough className="h-4 w-4" />
+        </Button>
+
+        <div className="w-px h-6 bg-border mx-1" />
+
+        {/* Títulos */}
+        <Button
+          type="button"
+          size="sm"
+          variant={editor.isActive('heading', { level: 1 }) ? 'secondary' : 'ghost'}
+          onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
+          className="h-8 px-2"
+        >
+          <Heading1 className="h-4 w-4" />
+        </Button>
+        <Button
+          type="button"
+          size="sm"
+          variant={editor.isActive('heading', { level: 2 }) ? 'secondary' : 'ghost'}
+          onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
+          className="h-8 px-2"
+        >
+          <Heading2 className="h-4 w-4" />
+        </Button>
+        <Button
+          type="button"
+          size="sm"
+          variant={editor.isActive('heading', { level: 3 }) ? 'secondary' : 'ghost'}
+          onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
+          className="h-8 px-2"
+        >
+          <Heading3 className="h-4 w-4" />
+        </Button>
+
+        <div className="w-px h-6 bg-border mx-1" />
+
+        {/* Listas */}
+        <Button
+          type="button"
+          size="sm"
           variant={editor.isActive('bulletList') ? 'secondary' : 'ghost'}
           onClick={() => editor.chain().focus().toggleBulletList().run()}
           className="h-8 px-2"
@@ -77,6 +173,64 @@ export function RichTextEditor({
           className="h-8 px-2"
         >
           <ListOrdered className="h-4 w-4" />
+        </Button>
+
+        <div className="w-px h-6 bg-border mx-1" />
+
+        {/* Alinhamento */}
+        <Button
+          type="button"
+          size="sm"
+          variant={editor.isActive({ textAlign: 'left' }) ? 'secondary' : 'ghost'}
+          onClick={() => editor.chain().focus().setTextAlign('left').run()}
+          className="h-8 px-2"
+        >
+          <AlignLeft className="h-4 w-4" />
+        </Button>
+        <Button
+          type="button"
+          size="sm"
+          variant={editor.isActive({ textAlign: 'center' }) ? 'secondary' : 'ghost'}
+          onClick={() => editor.chain().focus().setTextAlign('center').run()}
+          className="h-8 px-2"
+        >
+          <AlignCenter className="h-4 w-4" />
+        </Button>
+        <Button
+          type="button"
+          size="sm"
+          variant={editor.isActive({ textAlign: 'justify' }) ? 'secondary' : 'ghost'}
+          onClick={() => editor.chain().focus().setTextAlign('justify').run()}
+          className="h-8 px-2"
+        >
+          <AlignJustify className="h-4 w-4" />
+        </Button>
+
+        <div className="w-px h-6 bg-border mx-1" />
+
+        {/* Elementos */}
+        <Button
+          type="button"
+          size="sm"
+          variant={editor.isActive('link') ? 'secondary' : 'ghost'}
+          onClick={() => {
+            const url = window.prompt('Digite a URL:');
+            if (url) {
+              editor.chain().focus().setLink({ href: url }).run();
+            }
+          }}
+          className="h-8 px-2"
+        >
+          <LinkIcon className="h-4 w-4" />
+        </Button>
+        <Button
+          type="button"
+          size="sm"
+          variant="ghost"
+          onClick={() => editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()}
+          className="h-8 px-2"
+        >
+          <TableIcon className="h-4 w-4" />
         </Button>
       </div>
       <EditorContent 
