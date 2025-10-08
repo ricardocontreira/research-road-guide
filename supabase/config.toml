@@ -1,0 +1,4 @@
+project_id = "lovable-project"
+
+[functions.generate-abstract]
+verify_jwt = true
