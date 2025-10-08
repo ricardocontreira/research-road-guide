@@ -391,7 +391,7 @@ export default function ProjectEditor() {
     }
   };
 
-  const wordCount = content.split(/\s+/).filter(Boolean).length;
+  const wordCount = getWordCountFromHtml(content);
 
   return (
     <div className="min-h-screen bg-background flex">
@@ -462,6 +462,7 @@ export default function ProjectEditor() {
               ) : (
                 <>
                   <RichTextEditor
+                    key={currentSection}
                     value={content}
                     onChange={setContent}
                     placeholder={sectionPlaceholders[currentSection]}

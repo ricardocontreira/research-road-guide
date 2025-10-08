@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
@@ -76,6 +77,16 @@ export function RichTextEditor({
       onChange(editor.getHTML());
     },
   });
+
+  // Sincroniza o conteúdo do editor quando o valor externo muda
+  useEffect(() => {
+    if (!editor) return;
+    
+    const currentContent = editor.getHTML();
+    if (value !== currentContent) {
+      editor.commands.setContent(value || "", { emitUpdate: false });
+    }
+  }, [value, editor]);
 
   if (!editor) {
     return null;
