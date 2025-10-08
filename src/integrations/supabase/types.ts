@@ -14,7 +14,86 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      profiles: {
+        Row: {
+          created_at: string | null
+          id: string
+          name: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id: string
+          name: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          name?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      projects: {
+        Row: {
+          abstract_en: string | null
+          abstract_pt: string | null
+          area: string
+          created_at: string | null
+          id: string
+          introduction: string | null
+          literature: string | null
+          methodology: string | null
+          objectives: string | null
+          premise: string
+          results: string | null
+          title: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          abstract_en?: string | null
+          abstract_pt?: string | null
+          area: string
+          created_at?: string | null
+          id?: string
+          introduction?: string | null
+          literature?: string | null
+          methodology?: string | null
+          objectives?: string | null
+          premise: string
+          results?: string | null
+          title: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          abstract_en?: string | null
+          abstract_pt?: string | null
+          area?: string
+          created_at?: string | null
+          id?: string
+          introduction?: string | null
+          literature?: string | null
+          methodology?: string | null
+          objectives?: string | null
+          premise?: string
+          results?: string | null
+          title?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "projects_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
