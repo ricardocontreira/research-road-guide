@@ -1,4 +1,20 @@
 import { createContext, useContext, useState, ReactNode } from "react";
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
+
+// Inicialização do cliente Supabase
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+if (!supabaseUrl || !supabaseAnonKey) {
+  console.error('⚠️ Variáveis VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY não configuradas!');
+  console.error('Adicione-as no arquivo .env.local na raiz do projeto.');
+}
+
+// Criar cliente Supabase (mesmo se as chaves estiverem vazias, para evitar crashes)
+export const supabase: SupabaseClient = createClient(
+  supabaseUrl || 'https://placeholder.supabase.co',
+  supabaseAnonKey || 'placeholder-key'
+);
 
 interface User {
   id: string;

@@ -1,10 +1,17 @@
 /**
- * IMPORTANTE: Configure a variável de ambiente VITE_OPENAI_API_KEY
- * no arquivo .env.local na raiz do projeto:
+ * ⚙️ CONFIGURAÇÃO DAS VARIÁVEIS DE AMBIENTE
  * 
- * VITE_OPENAI_API_KEY=sk-proj-...
+ * Crie o arquivo .env.local na raiz do projeto com as seguintes chaves:
  * 
- * Obtenha sua chave em: https://platform.openai.com/api-keys
+ * VITE_SUPABASE_URL="https://seu-projeto.supabase.co"
+ * VITE_SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+ * VITE_OPENAI_API_KEY="sk-proj-..."
+ * 
+ * 📍 Onde obter as chaves:
+ * - Supabase: https://supabase.com/dashboard (Project Settings > API)
+ * - OpenAI: https://platform.openai.com/api-keys
+ * 
+ * ⚠️ IMPORTANTE: Reinicie o servidor de desenvolvimento após criar/editar o .env.local
  */
 
 import axios from 'axios';
