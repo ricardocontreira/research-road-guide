@@ -7,28 +7,27 @@ interface Step {
   id: string;
   label: string;
   icon?: React.ReactNode;
-  section?: "introduction" | "methodology" | "results";
-  route?: string;
+  section?: "introduction" | "methodology" | "results" | "abstract";
 }
 
 const steps: Step[] = [
   { id: "config", label: "Configuração do Projeto" },
   { id: "objectives", label: "Objetivos e Revisão" },
+  { id: "introduction", label: "Introdução", section: "introduction" },
+  { id: "methodology", label: "Metodologia", section: "methodology" },
+  { id: "results", label: "Resultados", section: "results" },
   { 
     id: "abstract", 
     label: "Resumo", 
     icon: <FileText className="w-4 h-4" />,
-    route: "/project/abstract" 
+    section: "abstract"
   },
-  { id: "introduction", label: "Introdução", section: "introduction" },
-  { id: "methodology", label: "Metodologia", section: "methodology" },
-  { id: "results", label: "Resultados", section: "results" },
 ];
 
 interface ProgressSidebarProps {
   project: Project;
-  currentSection: "introduction" | "methodology" | "results";
-  onSectionChange: (section: "introduction" | "methodology" | "results") => void;
+  currentSection: "introduction" | "methodology" | "results" | "abstract";
+  onSectionChange: (section: "introduction" | "methodology" | "results" | "abstract") => void;
 }
 
 export default function ProgressSidebar({
@@ -61,14 +60,24 @@ export default function ProgressSidebar({
     // Sempre permite Config e Objectives
     if (stepIndex <= 1) return true;
     
-    // Abstract requer objectives completo
-    if (step.id === "abstract") {
+    // Introduction requer objectives completo
+    if (step.id === "introduction") {
       return isStepComplete("objectives");
     }
     
-    // Introduction, Methodology, Results requerem abstract completo
-    if (["introduction", "methodology", "results"].includes(step.id)) {
-      return isStepComplete("abstract");
+    // Methodology requer introduction completo
+    if (step.id === "methodology") {
+      return isStepComplete("introduction");
+    }
+    
+    // Results requer methodology completo
+    if (step.id === "results") {
+      return isStepComplete("methodology");
+    }
+    
+    // Abstract requer results completo
+    if (step.id === "abstract") {
+      return isStepComplete("results");
     }
     
     return true;
@@ -87,14 +96,13 @@ export default function ProgressSidebar({
             const isComplete = isStepComplete(step.id);
             const isCurrent = isStepCurrent(step);
             const isEnabled = isStepEnabled(step, index);
-            const isClickable = (!!step.section || !!step.route) && isEnabled;
+            const isClickable = !!step.section && isEnabled;
 
             return (
               <button
                 key={step.id}
                 onClick={() => {
                   if (step.section) onSectionChange(step.section);
-                  if (step.route) navigate(step.route);
                 }}
                 disabled={!isClickable}
                 className={cn(

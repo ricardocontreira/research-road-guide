@@ -9,7 +9,6 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import ProjectSetup from "./pages/ProjectSetup";
-import ProjectAbstract from "./pages/ProjectAbstract";
 import ProjectEditor from "./pages/ProjectEditor";
 import NotFound from "./pages/NotFound";
 
@@ -45,14 +44,6 @@ const App = () => (
                 element={
                   <ProtectedRoute>
                     <ProjectSetup />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/project/abstract"
-                element={
-                  <ProtectedRoute>
-                    <ProjectAbstract />
                   </ProtectedRoute>
                 }
               />
