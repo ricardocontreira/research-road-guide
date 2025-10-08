@@ -16,65 +16,58 @@ import NotFound from "./pages/NotFound";
 const queryClient = new QueryClient();
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated } = useAuth();
-  return isAuthenticated ? <>{children}</> : <Navigate to="/login" />;
-}
-
-function ProjectLoader({ children }: { children: React.ReactNode }) {
-  const { user } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const { loadProjects } = useProject();
 
   useEffect(() => {
-    if (user?.id) {
+    if (isAuthenticated && user?.id) {
       loadProjects(user.id);
     }
-  }, [user?.id]);
+  }, [isAuthenticated, user?.id, loadProjects]);
 
-  return <>{children}</>;
+  return isAuthenticated ? <>{children}</> : <Navigate to="/login" />;
 }
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
       <ProjectProvider>
-        <ProjectLoader>
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
-              <Routes>
-                <Route path="/" element={<Navigate to="/login" />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Register />} />
-                <Route
-                  path="/dashboard"
-                  element={
-                    <ProtectedRoute>
-                      <Dashboard />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/project/setup"
-                  element={
-                    <ProtectedRoute>
-                      <ProjectSetup />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/project/editor"
-                  element={
-                    <ProtectedRoute>
-                      <ProjectEditor />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </BrowserRouter>
-          </TooltipProvider>
-        </ProjectLoader>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Navigate to="/login" />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route
+                path="/dashboard"
+                element={
+                  <ProtectedRoute>
+                    <Dashboard />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/project/setup"
+                element={
+                  <ProtectedRoute>
+                    <ProjectSetup />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/project/editor"
+                element={
+                  <ProtectedRoute>
+                    <ProjectEditor />
+                  </ProtectedRoute>
+                }
+              />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
       </ProjectProvider>
     </AuthProvider>
   </QueryClientProvider>
