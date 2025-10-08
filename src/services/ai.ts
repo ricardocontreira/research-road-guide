@@ -15,7 +15,7 @@
  * ⚠️ IMPORTANTE: Reinicie o servidor de desenvolvimento após criar/editar o .env.local
  */
 
-import { supabase } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 import { convert } from 'html-to-text';
 
 export interface AbstractInput {
