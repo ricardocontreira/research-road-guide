@@ -303,14 +303,30 @@ export default function ProjectEditor() {
       navigate("/dashboard");
       return;
     }
-    setContent(currentProject[currentSection] || "");
+    
+    // ⚠️ Apenas carrega o conteúdo para as seções de edição de texto
+    if (currentSection !== "abstract") {
+      const projectKey = currentSection as keyof typeof currentProject;
+      
+      // Garante que o valor é uma string e atualiza. Caso contrário, limpa.
+      if (typeof currentProject[projectKey] === 'string') {
+        setContent((currentProject[projectKey] as string) || "");
+      } else {
+        setContent(""); 
+      }
+    } else {
+       setContent(""); // Limpa o estado 'content' ao entrar na seção abstract
+    }
   }, [currentProject, currentSection, navigate]);
 
   useEffect(() => {
-    if (!currentProject) return;
+    // ⚠️ CRITICAL FIX: Não salva se a seção for 'abstract'
+    if (!currentProject || currentSection === "abstract") return; 
 
     const timer = setTimeout(() => {
-      if (content !== currentProject[currentSection]) {
+      // Usando tipagem segura para evitar erros de TS e garantir que o valor não salvo seja diferente do salvo
+      const projectKey = currentSection as keyof typeof currentProject;
+      if (typeof currentProject[projectKey] === 'string' && content !== currentProject[projectKey]) {
         updateProject(currentProject.id, { [currentSection]: content });
         setLastSaved(new Date());
       }
@@ -351,13 +367,23 @@ export default function ProjectEditor() {
   const canContinue = (section: Section): boolean => {
     if (!currentProject) return false;
     
+    // 1. Identifica se é uma seção de edição de texto
+    const isEditableSection = ["introduction", "methodology", "results"].includes(section);
+    
+    // 2. Define o conteúdo a ser validado: 
+    //    - Se for a seção atual e editável, usa o estado 'content' (não salvo).
+    //    - Caso contrário, usa o valor do projeto (já salvo).
+    const contentToValidate = section === currentSection && isEditableSection 
+      ? content 
+      : (currentProject[section as keyof typeof currentProject] as string) || "";
+    
     switch (section) {
       case "introduction":
-        return getWordCountFromHtml(currentProject.introduction) >= 200;
+        return getWordCountFromHtml(contentToValidate) >= 200;
       case "methodology":
-        return getWordCountFromHtml(currentProject.methodology) >= 150;
+        return getWordCountFromHtml(contentToValidate) >= 150;
       case "results":
-        return getWordCountFromHtml(currentProject.results) >= 150;
+        return getWordCountFromHtml(contentToValidate) >= 150;
       case "abstract":
         return !!(currentProject.abstractPT || currentProject.abstractEN);
       default:
