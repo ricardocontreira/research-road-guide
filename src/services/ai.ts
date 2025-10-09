@@ -33,6 +33,13 @@ export interface AbstractOutput {
   resumoEN?: string;
 }
 
+export interface AISuggestion {
+  type: "estrutura" | "clareza" | "melhoria" | "referencia";
+  title: string;
+  content: string;
+  icon: "Lightbulb" | "AlertCircle" | "BookOpen";
+}
+
 /**
  * Converte HTML para texto plano
  */
@@ -83,4 +90,36 @@ export async function generateAbstract(
     resumoPT: data.resumoPT,
     resumoEN: data.resumoEN
   };
+}
+
+/**
+ * Obtém sugestões acadêmicas baseadas em IA para uma seção específica
+ */
+export async function getAcademicSuggestions(
+  section: string,
+  content: string
+): Promise<AISuggestion[]> {
+  // Verificação de conteúdo mínimo no cliente
+  if (!content || content.trim().length < 50) {
+    return [];
+  }
+
+  // Converter HTML para texto plano
+  const plainText = htmlToPlainText(content);
+
+  try {
+    const { data, error } = await supabase.functions.invoke('analyze-text', {
+      body: { section, content: plainText }
+    });
+
+    if (error) {
+      console.error('Erro ao buscar sugestões:', error);
+      return [];
+    }
+
+    return data.suggestions || [];
+  } catch (err) {
+    console.error('Erro na chamada de getAcademicSuggestions:', err);
+    return [];
+  }
 }

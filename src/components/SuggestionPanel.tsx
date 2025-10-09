@@ -1,16 +1,15 @@
-import { useMemo } from "react";
-import { Lightbulb, AlertCircle, BookOpen } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Lightbulb, AlertCircle, BookOpen, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { getAcademicSuggestions, AISuggestion } from "@/services/ai";
 
 type Section = "objectives" | "literature" | "introduction" | "methodology" | "results";
 
-interface Suggestion {
-  type: "structure" | "clarity" | "improvement" | "reference";
-  title: string;
-  content: string;
-  highlight?: string;
-  icon: typeof Lightbulb;
-}
+const iconMap = {
+  Lightbulb,
+  AlertCircle,
+  BookOpen,
+};
 
 interface SuggestionPanelProps {
   section: Section;
@@ -18,128 +17,54 @@ interface SuggestionPanelProps {
 }
 
 export default function SuggestionPanel({ section, content }: SuggestionPanelProps) {
-  const suggestions = useMemo((): Suggestion[] => {
-    const wordCount = content.split(/\s+/).filter(Boolean).length;
+  const [aiSuggestions, setAiSuggestions] = useState<AISuggestion[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-    if (section === "objectives") {
-      return [
-        {
-          type: "structure",
-          title: "Objetivos Claros",
-          content: "Divida seus objetivos em Geral (o propósito central da pesquisa) e Específicos (metas mensuráveis para alcançar o objetivo geral).",
-          icon: Lightbulb,
-        },
-        wordCount > 30 && {
-          type: "clarity",
-          title: "Verbos de Ação",
-          content: "Use verbos precisos como 'analisar', 'investigar', 'avaliar', 'identificar' ao invés de 'estudar' ou 'conhecer'.",
-          icon: AlertCircle,
-        },
-        {
-          type: "improvement",
-          title: "Alinhamento",
-          content: "Certifique-se de que seus objetivos específicos respondem diretamente ao objetivo geral e estão alinhados com sua premissa.",
-          icon: Lightbulb,
-        },
-      ].filter(Boolean) as Suggestion[];
-    }
+  useEffect(() => {
+    const timeoutId = setTimeout(async () => {
+      if (!content || content.trim().length < 50) {
+        setAiSuggestions([]);
+        setIsLoading(false);
+        return;
+      }
 
-    if (section === "literature") {
-      return [
-        {
-          type: "structure",
-          title: "Revisão Crítica",
-          content: "Não apenas descreva o que outros autores disseram - faça conexões, identifique lacunas e posicione sua pesquisa no contexto existente.",
-          icon: Lightbulb,
-        },
-        wordCount > 50 && {
-          type: "reference",
-          title: "Atualidade das Fontes",
-          content: "Priorize referências dos últimos 5 anos, especialmente em áreas com rápida evolução tecnológica ou conceitual.",
-          icon: BookOpen,
-        },
-        {
-          type: "improvement",
-          title: "Organização Temática",
-          content: "Organize sua revisão por temas ou conceitos, não apenas cronologicamente ou por autor.",
-          icon: AlertCircle,
-        },
-      ].filter(Boolean) as Suggestion[];
-    }
+      setIsLoading(true);
+      setError(null);
 
-    if (section === "introduction") {
-      return [
-        {
-          type: "structure",
-          title: "Estrutura da Introdução",
-          content: "Sua introdução poderia começar contextualizando o problema de forma mais ampla. Considere apresentar dados estatísticos ou um panorama geral do tema.",
-          icon: Lightbulb,
-        },
-        wordCount > 50 && {
-          type: "clarity",
-          title: "Clareza na Escrita",
-          content: "Algumas frases estão muito longas. Considere dividi-las para melhorar a legibilidade.",
-          icon: AlertCircle,
-        },
-        {
-          type: "reference",
-          title: "Referência Sugerida",
-          content: "Silva et al. (2023). Inteligência Artificial na Educação: Uma revisão sistemática. Este trabalho apresenta um panorama atualizado do uso de IA em contextos educacionais.",
-          icon: BookOpen,
-        },
-      ].filter(Boolean) as Suggestion[];
-    }
+      try {
+        const suggestions = await getAcademicSuggestions(section, content);
+        setAiSuggestions(suggestions);
+      } catch (err) {
+        console.error('Erro ao carregar sugestões:', err);
+        setError('Não foi possível carregar sugestões');
+      } finally {
+        setIsLoading(false);
+      }
+    }, 1500);
 
-    if (section === "methodology") {
-      return [
-        {
-          type: "structure",
-          title: "Tempo Verbal",
-          content: "A metodologia deve estar em tempo passado, descrevendo os procedimentos que foram realizados.",
-          icon: AlertCircle,
-        },
-        wordCount > 30 && {
-          type: "improvement",
-          title: "Detalhamento Necessário",
-          content: "Em Ciências Humanas, é importante especificar o perfil dos participantes da pesquisa com mais detalhes (faixa etária, formação, etc.).",
-          icon: Lightbulb,
-        },
-        {
-          type: "reference",
-          title: "Referência Metodológica",
-          content: "Creswell, J. W. (2014). Projeto de pesquisa: métodos qualitativo, quantitativo e misto. Esta obra é referência em metodologia de pesquisa.",
-          icon: BookOpen,
-        },
-      ].filter(Boolean) as Suggestion[];
-    }
-
-    if (section === "results") {
-      return [
-        {
-          type: "structure",
-          title: "Separação de Seções",
-          content: "Evite interpretar resultados nesta seção. Reserve as interpretações e discussões para a seção de Discussão.",
-          icon: AlertCircle,
-        },
-        {
-          type: "improvement",
-          title: "Visualização de Dados",
-          content: "Considere adicionar elementos visuais (tabelas, gráficos) para ilustrar os dados de forma mais clara.",
-          icon: Lightbulb,
-        },
-        wordCount > 40 && {
-          type: "clarity",
-          title: "Organização dos Resultados",
-          content: "Organize os resultados de forma lógica, do geral ao específico, para facilitar a compreensão.",
-          icon: Lightbulb,
-        },
-      ].filter(Boolean) as Suggestion[];
-    }
-
-    return [];
+    return () => clearTimeout(timeoutId);
   }, [section, content]);
 
-  if (suggestions.length === 0) {
+  if (isLoading) {
+    return (
+      <div className="h-full border-l border-border bg-card overflow-y-auto">
+        <div className="p-6">
+          <h3 className="text-sm font-semibold text-foreground mb-4">
+            Sugestões Inteligentes
+          </h3>
+          <div className="flex flex-col items-center justify-center py-12">
+            <Loader2 className="w-8 h-8 text-primary animate-spin mb-4" />
+            <p className="text-sm text-muted-foreground">
+              Analisando seu conteúdo...
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!content || content.trim().length < 50) {
     return (
       <div className="h-full border-l border-border bg-card overflow-y-auto">
         <div className="p-6">
@@ -157,6 +82,40 @@ export default function SuggestionPanel({ section, content }: SuggestionPanelPro
     );
   }
 
+  if (error) {
+    return (
+      <div className="h-full border-l border-border bg-card overflow-y-auto">
+        <div className="p-6">
+          <h3 className="text-sm font-semibold text-foreground mb-4">
+            Sugestões Inteligentes
+          </h3>
+          <div className="text-center py-12">
+            <AlertCircle className="w-12 h-12 text-destructive mx-auto mb-4" />
+            <p className="text-sm text-muted-foreground">{error}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (aiSuggestions.length === 0) {
+    return (
+      <div className="h-full border-l border-border bg-card overflow-y-auto">
+        <div className="p-6">
+          <h3 className="text-sm font-semibold text-foreground mb-4">
+            Sugestões Inteligentes
+          </h3>
+          <div className="text-center py-12">
+            <Lightbulb className="w-12 h-12 text-muted mx-auto mb-4" />
+            <p className="text-sm text-muted-foreground">
+              Nenhuma sugestão no momento
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="h-full border-l border-border bg-card overflow-y-auto">
       <div className="p-6 space-y-4">
@@ -164,9 +123,9 @@ export default function SuggestionPanel({ section, content }: SuggestionPanelPro
           Sugestões Inteligentes
         </h3>
 
-        {suggestions.map((suggestion, index) => {
-          const Icon = suggestion.icon;
-          const isHighlight = suggestion.type === "improvement" || suggestion.type === "clarity";
+        {aiSuggestions.map((suggestion, index) => {
+          const Icon = iconMap[suggestion.icon] || Lightbulb;
+          const isHighlight = suggestion.type === "melhoria" || suggestion.type === "clareza";
 
           return (
             <div
@@ -198,7 +157,7 @@ export default function SuggestionPanel({ section, content }: SuggestionPanelPro
                   <p className="text-xs text-muted-foreground leading-relaxed">
                     {suggestion.content}
                   </p>
-                  {suggestion.type === "reference" && (
+                  {suggestion.type === "referencia" && (
                     <button className="mt-3 text-xs text-secondary hover:underline font-medium">
                       Adicionar às referências
                     </button>
