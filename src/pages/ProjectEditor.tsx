@@ -16,7 +16,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 
-type Section = "introduction" | "methodology" | "results" | "abstract";
+type Section = "config" | "objectives" | "literature" | "introduction" | "methodology" | "results" | "abstract";
 
 // Componente auxiliar para requisitos
 function RequirementItem({ 
@@ -295,17 +295,113 @@ function AbstractGenerator({ project, sectionContents, onUpdate }: AbstractGener
   );
 }
 
+// Componente interno para edição de configuração
+interface ConfigSectionProps {
+  project: any;
+  onUpdate: (updates: { title?: string; premise?: string; area?: string }) => void;
+}
+
+function ConfigSection({ project, onUpdate }: ConfigSectionProps) {
+  const [title, setTitle] = useState(project.title || "");
+  const [premise, setPremise] = useState(project.premise || "");
+  const [area, setArea] = useState(project.area || "");
+
+  const areas = [
+    "Ciências Exatas e da Terra",
+    "Ciências Biológicas",
+    "Engenharias",
+    "Ciências da Saúde",
+    "Ciências Sociais Aplicadas",
+    "Ciências Humanas",
+    "Linguística, Letras e Artes",
+    "Multidisciplinar",
+  ];
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const hasChanges = 
+        title !== project.title ||
+        premise !== project.premise ||
+        area !== project.area;
+      
+      if (hasChanges) {
+        onUpdate({ title, premise, area });
+      }
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [title, premise, area, project, onUpdate]);
+
+  return (
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Configuração do Projeto</CardTitle>
+          <CardDescription>
+            Defina as informações básicas do seu artigo acadêmico
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Título do Projeto</label>
+            <input
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Ex: Impactos da Inteligência Artificial na Educação Superior"
+              maxLength={150}
+              className="w-full px-3 py-2 border border-border rounded-md bg-background"
+            />
+            <p className="text-xs text-muted-foreground text-right">
+              {title.length}/150 caracteres
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Premissa da Pesquisa</label>
+            <Textarea
+              value={premise}
+              onChange={(e) => setPremise(e.target.value)}
+              placeholder="Descreva brevemente a questão central ou hipótese da sua pesquisa..."
+              rows={6}
+            />
+            <p className="text-xs text-muted-foreground text-right">
+              {premise.split(/\s+/).filter(Boolean).length} palavras
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Área do Projeto</label>
+            <Select value={area} onValueChange={setArea}>
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione uma área" />
+              </SelectTrigger>
+              <SelectContent>
+                {areas.map((areaOption) => (
+                  <SelectItem key={areaOption} value={areaOption}>
+                    {areaOption}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
 export default function ProjectEditor() {
   const { currentProject, updateProject } = useProject();
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [currentSection, setCurrentSection] = useState<Section>("introduction");
+  const [currentSection, setCurrentSection] = useState<Section>("config");
   const [content, setContent] = useState("");
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
   // Helper para obter conteúdo atualizado de cada seção
-  const getSectionContent = (section: "introduction" | "methodology" | "results"): string => {
+  const getSectionContent = (section: "introduction" | "methodology" | "results" | "objectives" | "literature"): string => {
     // Se for a seção atual, retorna o conteúdo não salvo
     if (section === currentSection) {
       return content;
@@ -317,8 +413,9 @@ export default function ProjectEditor() {
   // Função de navegação que salva antes de trocar de seção
   const navigateTo = async (section: Section) => {
     // Se estiver em uma seção editável e houver conteúdo não salvo, salvar primeiro
+    const editableSections = ["objectives", "literature", "introduction", "methodology", "results"];
     if (
-      (currentSection === "introduction" || currentSection === "methodology" || currentSection === "results") &&
+      editableSections.includes(currentSection) &&
       content !== ((currentProject?.[currentSection] as string) || "")
     ) {
       await handleSaveNow();
@@ -327,7 +424,7 @@ export default function ProjectEditor() {
   };
 
   const handleSaveNow = async () => {
-    if (!currentProject || currentSection === "abstract") return;
+    if (!currentProject || currentSection === "abstract" || currentSection === "config") return;
     
     setIsSaving(true);
     const projectKey = currentSection as keyof typeof currentProject;
@@ -338,30 +435,38 @@ export default function ProjectEditor() {
     setIsSaving(false);
   };
 
+  const handleConfigUpdate = async (updates: { title?: string; premise?: string; area?: string }) => {
+    if (!currentProject) return;
+    setIsSaving(true);
+    await updateProject(currentProject.id, updates);
+    setLastSaved(new Date());
+    setIsSaving(false);
+  };
+
   useEffect(() => {
     if (!currentProject) {
       navigate("/dashboard");
       return;
     }
     
-    // ⚠️ Apenas carrega o conteúdo para as seções de edição de texto
-    if (currentSection !== "abstract") {
+    // Carrega o conteúdo para as seções de edição de texto
+    const editableSections = ["objectives", "literature", "introduction", "methodology", "results"];
+    if (editableSections.includes(currentSection)) {
       const projectKey = currentSection as keyof typeof currentProject;
       
-      // Garante que o valor é uma string e atualiza. Caso contrário, limpa.
       if (typeof currentProject[projectKey] === 'string') {
         setContent((currentProject[projectKey] as string) || "");
       } else {
         setContent(""); 
       }
     } else {
-       setContent(""); // Limpa o estado 'content' ao entrar na seção abstract
+       setContent(""); // Limpa o estado 'content' para seções não editáveis (config/abstract)
     }
   }, [currentProject, currentSection, navigate]);
 
   useEffect(() => {
-    // ⚠️ CRITICAL FIX: Não salva se a seção for 'abstract'
-    if (!currentProject || currentSection === "abstract") return; 
+    // Não salva se a seção for 'abstract' ou 'config'
+    if (!currentProject || currentSection === "abstract" || currentSection === "config") return;
 
     setIsSaving(true);
     const timer = setTimeout(async () => {
@@ -383,6 +488,9 @@ export default function ProjectEditor() {
   if (!currentProject) return null;
 
   const sectionLabels = {
+    config: "Configuração do Projeto",
+    objectives: "Objetivos da Pesquisa",
+    literature: "Revisão Bibliográfica",
     introduction: "Introdução",
     methodology: "Metodologia",
     results: "Resultados",
@@ -390,6 +498,9 @@ export default function ProjectEditor() {
   };
 
   const sectionPlaceholders = {
+    config: "",
+    objectives: "Descreva os objetivos gerais e específicos da sua pesquisa, incluindo as questões que pretende responder e os resultados esperados...",
+    literature: "Apresente o referencial teórico da sua pesquisa, citando autores relevantes e trabalhos anteriores relacionados ao tema...",
     introduction: "A inteligência artificial tem revolucionado diversos setores da sociedade, trazendo mudanças significativas na forma como vivemos, trabalhamos e nos relacionamos...",
     methodology: "Esta pesquisa adotou uma abordagem qualitativa, utilizando entrevistas semiestruturadas com 20 participantes...",
     results: "Os dados coletados revelaram que 85% dos participantes relataram impactos positivos da tecnologia em suas atividades diárias...",
@@ -397,14 +508,17 @@ export default function ProjectEditor() {
   };
 
   const sectionDescriptions = {
-    introduction: "Contextualize seu trabalho e apresente o problema de pesquisa",
-    methodology: "Descreva detalhadamente os métodos, técnicas e procedimentos utilizados",
-    results: "Apresente os dados obtidos de forma clara e objetiva",
+    config: "Configure as informações básicas do seu projeto",
+    objectives: "Defina o que você pretende alcançar com sua pesquisa (mínimo 100 palavras)",
+    literature: "Apresente a fundamentação teórica do seu trabalho (mínimo 150 palavras)",
+    introduction: "Contextualize seu trabalho e apresente o problema de pesquisa (mínimo 200 palavras)",
+    methodology: "Descreva detalhadamente os métodos, técnicas e procedimentos utilizados (mínimo 150 palavras)",
+    results: "Apresente os dados obtidos de forma clara e objetiva (mínimo 150 palavras)",
     abstract: "Gere automaticamente o resumo do seu artigo em português e/ou inglês",
   };
 
   const getNextSection = (current: Section): Section | null => {
-    const order: Section[] = ["introduction", "methodology", "results", "abstract"];
+    const order: Section[] = ["config", "objectives", "literature", "introduction", "methodology", "results", "abstract"];
     const currentIndex = order.indexOf(current);
     return currentIndex < order.length - 1 ? order[currentIndex + 1] : null;
   };
@@ -412,17 +526,20 @@ export default function ProjectEditor() {
   const canContinue = (section: Section): boolean => {
     if (!currentProject) return false;
     
-    // 1. Identifica se é uma seção de edição de texto
-    const isEditableSection = ["introduction", "methodology", "results"].includes(section);
+    const editableSections = ["objectives", "literature", "introduction", "methodology", "results"];
+    const isEditableSection = editableSections.includes(section);
     
-    // 2. Define o conteúdo a ser validado: 
-    //    - Se for a seção atual e editável, usa o estado 'content' (não salvo).
-    //    - Caso contrário, usa o valor do projeto (já salvo).
     const contentToValidate = section === currentSection && isEditableSection 
       ? content 
       : (currentProject[section as keyof typeof currentProject] as string) || "";
     
     switch (section) {
+      case "config":
+        return !!(currentProject.title && currentProject.premise && currentProject.area);
+      case "objectives":
+        return getWordCountFromHtml(contentToValidate) >= 100;
+      case "literature":
+        return getWordCountFromHtml(contentToValidate) >= 150;
       case "introduction":
         return getWordCountFromHtml(contentToValidate) >= 200;
       case "methodology":
@@ -445,6 +562,8 @@ export default function ProjectEditor() {
           project={currentProject}
           currentSection={currentSection}
           sectionContents={{
+            objectives: getSectionContent("objectives"),
+            literature: getSectionContent("literature"),
             introduction: getSectionContent("introduction"),
             methodology: getSectionContent("methodology"),
             results: getSectionContent("results"),
@@ -473,7 +592,7 @@ export default function ProjectEditor() {
               </div>
             </div>
             <div className="flex items-center gap-4">
-              {currentSection !== "abstract" && (
+              {currentSection !== "abstract" && currentSection !== "config" && (
                 <Button 
                   variant="outline" 
                   size="sm"
@@ -523,7 +642,12 @@ export default function ProjectEditor() {
                 </p>
               </div>
 
-              {currentSection === "abstract" ? (
+              {currentSection === "config" ? (
+                <ConfigSection 
+                  project={currentProject}
+                  onUpdate={handleConfigUpdate}
+                />
+              ) : currentSection === "abstract" ? (
                 <AbstractGenerator 
                   project={currentProject}
                   sectionContents={{
@@ -578,7 +702,7 @@ export default function ProjectEditor() {
           </div>
 
           {/* Painel de Sugestões */}
-          {currentSection !== "abstract" && (
+          {currentSection !== "abstract" && currentSection !== "config" && (
             <SuggestionPanel section={currentSection} content={content} />
           )}
         </div>

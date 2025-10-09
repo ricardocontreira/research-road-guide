@@ -49,14 +49,6 @@ const App = () => (
                 }
               />
               <Route
-                path="/project/setup"
-                element={
-                  <ProtectedRoute>
-                    <ProjectSetup />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
                 path="/project/editor"
                 element={
                   <ProtectedRoute>

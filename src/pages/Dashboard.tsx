@@ -38,7 +38,7 @@ export default function Dashboard() {
       createProject(newProject.title, newProject.premise, newProject.area);
       setIsDialogOpen(false);
       setNewProject({ title: "", premise: "", area: "" });
-      navigate("/project/setup");
+      navigate("/project/editor");
     }
   };
 

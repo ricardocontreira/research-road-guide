@@ -8,12 +8,13 @@ interface Step {
   id: string;
   label: string;
   icon?: React.ReactNode;
-  section?: "introduction" | "methodology" | "results" | "abstract";
+  section?: "config" | "objectives" | "literature" | "introduction" | "methodology" | "results" | "abstract";
 }
 
 const steps: Step[] = [
-  { id: "config", label: "Configuração do Projeto" },
-  { id: "objectives", label: "Objetivos e Revisão" },
+  { id: "config", label: "Configuração do Projeto", section: "config" },
+  { id: "objectives", label: "Objetivos da Pesquisa", section: "objectives" },
+  { id: "literature", label: "Revisão Bibliográfica", section: "literature" },
   { id: "introduction", label: "Introdução", section: "introduction" },
   { id: "methodology", label: "Metodologia", section: "methodology" },
   { id: "results", label: "Resultados", section: "results" },
@@ -27,14 +28,16 @@ const steps: Step[] = [
 
 interface ProgressSidebarProps {
   project: Project;
-  currentSection: "introduction" | "methodology" | "results" | "abstract";
+  currentSection: "config" | "objectives" | "literature" | "introduction" | "methodology" | "results" | "abstract";
   sectionContents: {
+    objectives: string;
+    literature: string;
     introduction: string;
     methodology: string;
     results: string;
   };
   isSaving: boolean;
-  onSectionChange: (section: "introduction" | "methodology" | "results" | "abstract") => void;
+  onSectionChange: (section: "config" | "objectives" | "literature" | "introduction" | "methodology" | "results" | "abstract") => void;
 }
 
 export default function ProgressSidebar({
@@ -51,7 +54,9 @@ export default function ProgressSidebar({
       case "config":
         return !!(project.title && project.premise && project.area);
       case "objectives":
-        return !!(project.objectives && project.literature);
+        return getWordCountFromHtml(sectionContents.objectives) >= 100;
+      case "literature":
+        return getWordCountFromHtml(sectionContents.literature) >= 150;
       case "abstract":
         return !!(project.abstractPT || project.abstractEN);
       case "introduction":
@@ -66,12 +71,22 @@ export default function ProgressSidebar({
   };
 
   const isStepEnabled = (step: Step, stepIndex: number): boolean => {
-    // Sempre permite Config e Objectives
-    if (stepIndex <= 1) return true;
+    // Config sempre habilitado
+    if (step.id === "config") return true;
     
-    // Introduction requer objectives completo
-    if (step.id === "introduction") {
+    // Objectives requer config completo
+    if (step.id === "objectives") {
+      return isStepComplete("config");
+    }
+    
+    // Literature requer objectives completo
+    if (step.id === "literature") {
       return isStepComplete("objectives");
+    }
+    
+    // Introduction requer literature completo
+    if (step.id === "introduction") {
+      return isStepComplete("literature");
     }
     
     // Methodology requer introduction completo

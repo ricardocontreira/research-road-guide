@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { Lightbulb, AlertCircle, BookOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-type Section = "introduction" | "methodology" | "results";
+type Section = "objectives" | "literature" | "introduction" | "methodology" | "results";
 
 interface Suggestion {
   type: "structure" | "clarity" | "improvement" | "reference";
@@ -20,6 +20,52 @@ interface SuggestionPanelProps {
 export default function SuggestionPanel({ section, content }: SuggestionPanelProps) {
   const suggestions = useMemo((): Suggestion[] => {
     const wordCount = content.split(/\s+/).filter(Boolean).length;
+
+    if (section === "objectives") {
+      return [
+        {
+          type: "structure",
+          title: "Objetivos Claros",
+          content: "Divida seus objetivos em Geral (o propósito central da pesquisa) e Específicos (metas mensuráveis para alcançar o objetivo geral).",
+          icon: Lightbulb,
+        },
+        wordCount > 30 && {
+          type: "clarity",
+          title: "Verbos de Ação",
+          content: "Use verbos precisos como 'analisar', 'investigar', 'avaliar', 'identificar' ao invés de 'estudar' ou 'conhecer'.",
+          icon: AlertCircle,
+        },
+        {
+          type: "improvement",
+          title: "Alinhamento",
+          content: "Certifique-se de que seus objetivos específicos respondem diretamente ao objetivo geral e estão alinhados com sua premissa.",
+          icon: Lightbulb,
+        },
+      ].filter(Boolean) as Suggestion[];
+    }
+
+    if (section === "literature") {
+      return [
+        {
+          type: "structure",
+          title: "Revisão Crítica",
+          content: "Não apenas descreva o que outros autores disseram - faça conexões, identifique lacunas e posicione sua pesquisa no contexto existente.",
+          icon: Lightbulb,
+        },
+        wordCount > 50 && {
+          type: "reference",
+          title: "Atualidade das Fontes",
+          content: "Priorize referências dos últimos 5 anos, especialmente em áreas com rápida evolução tecnológica ou conceitual.",
+          icon: BookOpen,
+        },
+        {
+          type: "improvement",
+          title: "Organização Temática",
+          content: "Organize sua revisão por temas ou conceitos, não apenas cronologicamente ou por autor.",
+          icon: AlertCircle,
+        },
+      ].filter(Boolean) as Suggestion[];
+    }
 
     if (section === "introduction") {
       return [
