@@ -18,16 +18,12 @@ export async function parseDocument(file: File): Promise<string> {
 }
 
 async function parsePDF(file: File): Promise<string> {
-  // Usar pdfjs-dist que funciona no navegador
-  const pdfjsLib = await import('pdfjs-dist');
-  
-  // Configurar worker usando o pacote instalado
-  const pdfjsWorker = await import('pdfjs-dist/build/pdf.worker.min.mjs?url');
-  pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker.default;
-  
+  // Usar pdfjs-dist (ESM) no navegador, sem worker para evitar erros de carregamento
+  const pdfjsLib = await import('pdfjs-dist/build/pdf.mjs');
+
   const arrayBuffer = await file.arrayBuffer();
-  const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-  
+  const pdf = await (pdfjsLib as any).getDocument({ data: arrayBuffer, disableWorker: true }).promise;
+
   let fullText = '';
   
   // Extrair texto de todas as páginas
