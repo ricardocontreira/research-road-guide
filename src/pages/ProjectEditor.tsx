@@ -17,27 +17,6 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 type Section = "config" | "objectives" | "literature" | "introduction" | "methodology" | "results" | "abstract";
 
-// Componente auxiliar para requisitos
-function RequirementItem({
-  label,
-  met,
-  current
-}: {
-  label: string;
-  met: boolean;
-  current?: number;
-}) {
-  return <div className="flex items-center justify-between p-2 rounded bg-secondary/50">
-      <span className="text-sm">{label}</span>
-      <div className="flex items-center gap-2">
-        {current !== undefined && <span className="text-xs text-muted-foreground">
-            {current} palavras
-          </span>}
-        {met ? <Check className="w-4 h-4 text-green-600" /> : <AlertCircle className="w-4 h-4 text-yellow-600" />}
-      </div>
-    </div>;
-}
-
 // Componente de geração de abstract
 interface AbstractGeneratorProps {
   project: any;
@@ -122,21 +101,6 @@ function AbstractGenerator({
     });
   };
   return <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Requisitos para Geração</CardTitle>
-          <CardDescription>
-            Verifique se o conteúdo necessário foi preenchido
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-2">
-          <RequirementItem label="Objetivos" met={!!project.objectives} />
-          <RequirementItem label="Introdução (mín. 200 palavras)" met={wordCounts.introduction >= 200} current={wordCounts.introduction} />
-          <RequirementItem label="Metodologia (mín. 150 palavras)" met={wordCounts.methodology >= 150} current={wordCounts.methodology} />
-          <RequirementItem label="Resultados (mín. 150 palavras)" met={wordCounts.results >= 150} current={wordCounts.results} />
-        </CardContent>
-      </Card>
-
       <Card>
         <CardHeader>
           <CardTitle className="text-lg">Configurar Geração</CardTitle>
