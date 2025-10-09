@@ -28,15 +28,19 @@ const steps: Step[] = [
 interface ProgressSidebarProps {
   project: Project;
   currentSection: "introduction" | "methodology" | "results" | "abstract";
-  currentContent: string; // Conteúdo não salvo da seção atual
-  isSaving: boolean; // Status de salvamento
+  sectionContents: {
+    introduction: string;
+    methodology: string;
+    results: string;
+  };
+  isSaving: boolean;
   onSectionChange: (section: "introduction" | "methodology" | "results" | "abstract") => void;
 }
 
 export default function ProgressSidebar({
   project,
   currentSection,
-  currentContent,
+  sectionContents,
   isSaving,
   onSectionChange,
 }: ProgressSidebarProps) {
@@ -51,21 +55,11 @@ export default function ProgressSidebar({
       case "abstract":
         return !!(project.abstractPT || project.abstractEN);
       case "introduction":
-        // Se for a seção atual, usa o conteúdo não salvo
-        if (stepId === currentSection) {
-          return getWordCountFromHtml(currentContent) >= 300;
-        }
-        return getWordCountFromHtml(project.introduction || "") >= 300;
+        return getWordCountFromHtml(sectionContents.introduction) >= 300;
       case "methodology":
-        if (stepId === currentSection) {
-          return getWordCountFromHtml(currentContent) >= 300;
-        }
-        return getWordCountFromHtml(project.methodology || "") >= 300;
+        return getWordCountFromHtml(sectionContents.methodology) >= 300;
       case "results":
-        if (stepId === currentSection) {
-          return getWordCountFromHtml(currentContent) >= 300;
-        }
-        return getWordCountFromHtml(project.results || "") >= 300;
+        return getWordCountFromHtml(sectionContents.results) >= 300;
       default:
         return false;
     }

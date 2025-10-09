@@ -50,10 +50,15 @@ function RequirementItem({
 // Componente de geração de abstract
 interface AbstractGeneratorProps {
   project: any;
+  sectionContents: {
+    introduction: string;
+    methodology: string;
+    results: string;
+  };
   onUpdate: (abstractPT: string, abstractEN: string) => void;
 }
 
-function AbstractGenerator({ project, onUpdate }: AbstractGeneratorProps) {
+function AbstractGenerator({ project, sectionContents, onUpdate }: AbstractGeneratorProps) {
   const { toast } = useToast();
   const [language, setLanguage] = useState<'Português' | 'Inglês' | 'Ambos'>('Ambos');
   const [isGenerating, setIsGenerating] = useState(false);
@@ -62,9 +67,9 @@ function AbstractGenerator({ project, onUpdate }: AbstractGeneratorProps) {
   const [error, setError] = useState('');
 
   const wordCounts = {
-    introduction: getWordCountFromHtml(project.introduction),
-    methodology: getWordCountFromHtml(project.methodology),
-    results: getWordCountFromHtml(project.results)
+    introduction: getWordCountFromHtml(sectionContents.introduction),
+    methodology: getWordCountFromHtml(sectionContents.methodology),
+    results: getWordCountFromHtml(sectionContents.results)
   };
 
   const canGenerate = 
@@ -85,9 +90,9 @@ function AbstractGenerator({ project, onUpdate }: AbstractGeneratorProps) {
         premise: project.premise,
         area: project.area,
         objectives: project.objectives,
-        introduction: project.introduction,
-        methodology: project.methodology,
-        results: project.results
+        introduction: sectionContents.introduction,
+        methodology: sectionContents.methodology,
+        results: sectionContents.results
       }, language);
       
       const newPT = result.resumoPT || generatedPT;
@@ -299,6 +304,16 @@ export default function ProjectEditor() {
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
+  // Helper para obter conteúdo atualizado de cada seção
+  const getSectionContent = (section: "introduction" | "methodology" | "results"): string => {
+    // Se for a seção atual, retorna o conteúdo não salvo
+    if (section === currentSection) {
+      return content;
+    }
+    // Caso contrário, retorna o conteúdo salvo do projeto
+    return (currentProject?.[section] as string) || "";
+  };
+
   useEffect(() => {
     if (!currentProject) {
       navigate("/dashboard");
@@ -417,7 +432,11 @@ export default function ProjectEditor() {
       <ProgressSidebar
         project={currentProject}
         currentSection={currentSection}
-        currentContent={content}
+        sectionContents={{
+          introduction: getSectionContent("introduction"),
+          methodology: getSectionContent("methodology"),
+          results: getSectionContent("results"),
+        }}
         isSaving={isSaving}
         onSectionChange={setCurrentSection}
       />
@@ -495,6 +514,11 @@ export default function ProjectEditor() {
               {currentSection === "abstract" ? (
                 <AbstractGenerator 
                   project={currentProject}
+                  sectionContents={{
+                    introduction: getSectionContent("introduction"),
+                    methodology: getSectionContent("methodology"),
+                    results: getSectionContent("results"),
+                  }}
                   onUpdate={(abstractPT, abstractEN) => {
                     updateProject(currentProject.id, { abstractPT, abstractEN });
                   }}
