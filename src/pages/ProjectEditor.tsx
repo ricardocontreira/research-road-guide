@@ -15,6 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 type Section = "config" | "objectives" | "literature" | "introduction" | "methodology" | "results" | "abstract";
 
 // Componente de geração de abstract
@@ -407,115 +408,130 @@ export default function ProjectEditor() {
   };
   const wordCount = getWordCountFromHtml(content);
   return <div className="min-h-screen bg-background flex">
-      {/* Sidebar de Progresso */}
-        <ProgressSidebar project={currentProject} currentSection={currentSection} sectionContents={{
-      objectives: getSectionContent("objectives"),
-      literature: getSectionContent("literature"),
-      introduction: getSectionContent("introduction"),
-      methodology: getSectionContent("methodology"),
-      results: getSectionContent("results")
-    }} isSaving={isSaving} onSectionChange={navigateTo} />
+      <ResizablePanelGroup direction="horizontal">
+        {/* Painel 1: Sidebar de Progresso */}
+        <ResizablePanel defaultSize={15} minSize={4} maxSize={30} id="progress-sidebar">
+          <ProgressSidebar project={currentProject} currentSection={currentSection} sectionContents={{
+            objectives: getSectionContent("objectives"),
+            literature: getSectionContent("literature"),
+            introduction: getSectionContent("introduction"),
+            methodology: getSectionContent("methodology"),
+            results: getSectionContent("results")
+          }} isSaving={isSaving} onSectionChange={navigateTo} />
+        </ResizablePanel>
 
-      {/* Área Principal */}
-      <div className="flex-1 flex flex-col">
-        {/* Header */}
-        <header className="border-b border-border bg-card sticky top-0 z-10">
-          <div className="px-6 py-4 flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Button variant="ghost" size="sm" onClick={() => navigate("/dashboard")}>
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Voltar
-              </Button>
-              <div>
-                <h1 className="text-lg font-semibold text-foreground line-clamp-1">
-                  {currentProject.title}
-                </h1>
-                <p className="text-xs text-muted-foreground">
-                  {currentProject.area}
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-4">
-              {currentSection !== "abstract" && currentSection !== "config" && <Button variant="outline" size="sm" onClick={handleSaveNow} disabled={isSaving}>
-                  {isSaving ? <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Salvando...
-                    </> : <>
-                      <Check className="w-4 h-4 mr-2" />
-                      Salvar Agora
-                    </>}
-                </Button>}
-              {lastSaved && <span className="text-xs text-muted-foreground">
-                  Salvo às {lastSaved.toLocaleTimeString('pt-BR', {
-                hour: '2-digit',
-                minute: '2-digit'
-              })}
-                </span>}
-              <Button variant="outline" size="sm">
-                <FileDown className="w-4 h-4 mr-2" />
-                Exportar
-              </Button>
-              <div className="bg-primary text-primary-foreground rounded-full w-8 h-8 flex items-center justify-center font-semibold text-sm">
-                {user?.name.charAt(0).toUpperCase()}
-              </div>
-            </div>
-          </div>
-        </header>
+        {/* Separador 1 */}
+        <ResizableHandle withHandle />
 
-        {/* Conteúdo */}
-        <div className="flex-1 flex">
-          {/* Editor */}
-          <div className="flex-1 overflow-y-auto">
-            <div className="max-w-[800px] mx-auto px-6 py-12">
-              <div className="mb-6">
-                <h2 className="text-2xl font-semibold text-foreground mb-2">
-                  {sectionLabels[currentSection]}
-                </h2>
-                <p className="text-sm text-muted-foreground">
-                  {sectionDescriptions[currentSection]}
-                </p>
-              </div>
-
-              {currentSection === "config" ? <ConfigSection project={currentProject} onUpdate={handleConfigUpdate} /> : currentSection === "abstract" ? <AbstractGenerator project={currentProject} sectionContents={{
-              introduction: getSectionContent("introduction"),
-              methodology: getSectionContent("methodology"),
-              results: getSectionContent("results")
-            }} onUpdate={(abstractPT, abstractEN) => {
-              updateProject(currentProject.id, {
-                abstractPT,
-                abstractEN
-              });
-            }} /> : <>
-                  <RichTextEditor key={currentSection} value={content} onChange={setContent} placeholder={sectionPlaceholders[currentSection]} minHeight="600px" className="font-serif text-[17px] leading-relaxed border-0" />
-
-                  <div className="mt-4 flex items-center justify-between text-sm text-muted-foreground">
-                    <span>{wordCount} palavras</span>
-                    <span>{content.length} caracteres</span>
+        {/* Painel 2: Conteúdo Principal */}
+        <ResizablePanel minSize={40}>
+          <div className="flex flex-col h-full">
+            {/* Header */}
+            <header className="border-b border-border bg-card sticky top-0 z-10">
+              <div className="px-6 py-4 flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <Button variant="ghost" size="sm" onClick={() => navigate("/dashboard")}>
+                    <ArrowLeft className="w-4 h-4 mr-2" />
+                    Voltar
+                  </Button>
+                  <div>
+                    <h1 className="text-lg font-semibold text-foreground line-clamp-1">
+                      {currentProject.title}
+                    </h1>
+                    <p className="text-xs text-muted-foreground">
+                      {currentProject.area}
+                    </p>
                   </div>
-                </>}
+                </div>
+                <div className="flex items-center gap-4">
+                  {currentSection !== "abstract" && currentSection !== "config" && <Button variant="outline" size="sm" onClick={handleSaveNow} disabled={isSaving}>
+                      {isSaving ? <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Salvando...
+                        </> : <>
+                          <Check className="w-4 h-4 mr-2" />
+                          Salvar Agora
+                        </>}
+                    </Button>}
+                  {lastSaved && <span className="text-xs text-muted-foreground">
+                      Salvo às {lastSaved.toLocaleTimeString('pt-BR', {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })}
+                    </span>}
+                  <Button variant="outline" size="sm">
+                    <FileDown className="w-4 h-4 mr-2" />
+                    Exportar
+                  </Button>
+                  <div className="bg-primary text-primary-foreground rounded-full w-8 h-8 flex items-center justify-center font-semibold text-sm">
+                    {user?.name.charAt(0).toUpperCase()}
+                  </div>
+                </div>
+              </div>
+            </header>
 
-              {getNextSection(currentSection) && canContinue(currentSection) && <div className="mt-8 p-4 bg-primary/5 border border-primary/20 rounded-lg">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="font-medium text-foreground">
-                        Próxima etapa disponível
-                      </h3>
-                      <p className="text-sm text-muted-foreground">
-                        {sectionLabels[getNextSection(currentSection)!]}
-                      </p>
+            {/* Conteúdo */}
+            <div className="flex-1 overflow-y-auto">
+              <div className="max-w-[800px] mx-auto px-6 py-12">
+                <div className="mb-6">
+                  <h2 className="text-2xl font-semibold text-foreground mb-2">
+                    {sectionLabels[currentSection]}
+                  </h2>
+                  <p className="text-sm text-muted-foreground">
+                    {sectionDescriptions[currentSection]}
+                  </p>
+                </div>
+
+                {currentSection === "config" ? <ConfigSection project={currentProject} onUpdate={handleConfigUpdate} /> : currentSection === "abstract" ? <AbstractGenerator project={currentProject} sectionContents={{
+                introduction: getSectionContent("introduction"),
+                methodology: getSectionContent("methodology"),
+                results: getSectionContent("results")
+              }} onUpdate={(abstractPT, abstractEN) => {
+                updateProject(currentProject.id, {
+                  abstractPT,
+                  abstractEN
+                });
+              }} /> : <>
+                    <RichTextEditor key={currentSection} value={content} onChange={setContent} placeholder={sectionPlaceholders[currentSection]} minHeight="600px" className="font-serif text-[17px] leading-relaxed border-0" />
+
+                    <div className="mt-4 flex items-center justify-between text-sm text-muted-foreground">
+                      <span>{wordCount} palavras</span>
+                      <span>{content.length} caracteres</span>
                     </div>
-                    <Button onClick={() => navigateTo(getNextSection(currentSection)!)} size="lg">
-                      Continuar
-                      <ArrowRight className="w-4 h-4 ml-2" />
-                    </Button>
-                  </div>
-                </div>}
+                  </>}
+
+                {getNextSection(currentSection) && canContinue(currentSection) && <div className="mt-8 p-4 bg-primary/5 border border-primary/20 rounded-lg">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h3 className="font-medium text-foreground">
+                          Próxima etapa disponível
+                        </h3>
+                        <p className="text-sm text-muted-foreground">
+                          {sectionLabels[getNextSection(currentSection)!]}
+                        </p>
+                      </div>
+                      <Button onClick={() => navigateTo(getNextSection(currentSection)!)} size="lg">
+                        Continuar
+                        <ArrowRight className="w-4 h-4 ml-2" />
+                      </Button>
+                    </div>
+                  </div>}
+              </div>
             </div>
           </div>
+        </ResizablePanel>
 
-          {/* Painel de Sugestões */}
-          {currentSection !== "abstract" && currentSection !== "config" && <SuggestionPanel section={currentSection} content={content} />}
-        </div>
-      </div>
+        {/* Separador 2 - Condicional */}
+        {currentSection !== "abstract" && currentSection !== "config" && (
+          <ResizableHandle withHandle />
+        )}
+
+        {/* Painel 3: Sugestões Inteligentes (Condicional) */}
+        {currentSection !== "abstract" && currentSection !== "config" && (
+          <ResizablePanel defaultSize={25} minSize={4} maxSize={40} id="suggestion-panel">
+            <SuggestionPanel section={currentSection} content={content} />
+          </ResizablePanel>
+        )}
+      </ResizablePanelGroup>
     </div>;
 }

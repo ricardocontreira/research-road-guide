@@ -112,7 +112,7 @@ export default function ProgressSidebar({
   };
 
   return (
-    <aside className="w-64 border-r border-border bg-card flex-shrink-0">
+    <div className="h-full border-r border-border bg-card overflow-y-auto">
       <div className="p-6">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-sm font-semibold text-foreground">Progresso</h3>
@@ -180,6 +180,6 @@ export default function ProgressSidebar({
           })}
         </nav>
       </div>
-    </aside>
+    </div>
   );
 }

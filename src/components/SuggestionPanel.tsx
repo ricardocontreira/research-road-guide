@@ -141,7 +141,7 @@ export default function SuggestionPanel({ section, content }: SuggestionPanelPro
 
   if (suggestions.length === 0) {
     return (
-      <aside className="w-96 border-l border-border bg-card overflow-y-auto flex-shrink-0">
+      <div className="h-full border-l border-border bg-card overflow-y-auto">
         <div className="p-6">
           <h3 className="text-sm font-semibold text-foreground mb-4">
             Sugestões Inteligentes
@@ -153,12 +153,12 @@ export default function SuggestionPanel({ section, content }: SuggestionPanelPro
             </p>
           </div>
         </div>
-      </aside>
+      </div>
     );
   }
 
   return (
-    <aside className="w-96 border-l border-border bg-card overflow-y-auto flex-shrink-0">
+    <div className="h-full border-l border-border bg-card overflow-y-auto">
       <div className="p-6 space-y-4">
         <h3 className="text-sm font-semibold text-foreground mb-4">
           Sugestões Inteligentes
@@ -209,6 +209,6 @@ export default function SuggestionPanel({ section, content }: SuggestionPanelPro
           );
         })}
       </div>
-    </aside>
+    </div>
   );
 }
