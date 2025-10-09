@@ -18,13 +18,17 @@ export async function parseDocument(file: File): Promise<string> {
 }
 
 async function parsePDF(file: File): Promise<string> {
-  // PDF.js em modo sem worker para evitar erros de carregamento do worker em ambientes restritos
+  // PDF.js ESM + worker empacotado pelo Vite
   const pdfjs = await import('pdfjs-dist/build/pdf.mjs');
-  const { getDocument } = pdfjs as any;
+  // Aponta o worker para o arquivo dentro do pacote (Vite resolve para URL final)
+  (pdfjs as any).GlobalWorkerOptions.workerSrc = new URL(
+    'pdfjs-dist/build/pdf.worker.min.mjs',
+    import.meta.url
+  ).toString();
 
   const arrayBuffer = await file.arrayBuffer();
-  const loadingTask = (getDocument as any)({ data: arrayBuffer, disableWorker: true });
-  const pdf = await loadingTask.promise;
+  const { getDocument } = pdfjs as any;
+  const pdf = await (getDocument as any)({ data: arrayBuffer }).promise;
 
   let fullText = '';
   for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
