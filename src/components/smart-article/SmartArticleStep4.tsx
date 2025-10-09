@@ -95,6 +95,24 @@ export default function SmartArticleStep4({
     });
   };
   
+  const sanitizeFileName = (fileName: string): string => {
+    // Separar nome e extensão
+    const lastDotIndex = fileName.lastIndexOf('.');
+    const name = fileName.substring(0, lastDotIndex);
+    const extension = fileName.substring(lastDotIndex);
+    
+    // Normalizar e remover acentos
+    const sanitizedName = name
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '') // Remove diacríticos/acentos
+      .replace(/[^\w\s-]/g, '') // Remove caracteres especiais exceto espaços, hífens e underscores
+      .replace(/\s+/g, '_') // Substitui espaços por underscores
+      .replace(/_+/g, '_') // Remove underscores duplicados
+      .toLowerCase(); // Converte para minúsculas
+    
+    return sanitizedName + extension.toLowerCase();
+  };
+  
   const handleSaveProject = async () => {
     setIsSaving(true);
     
@@ -105,7 +123,8 @@ export default function SmartArticleStep4({
       // Upload do arquivo para storage
       let documentUrl = "";
       if (file) {
-        const filePath = `${user.id}/${Date.now()}_${file.name}`;
+        const sanitizedFileName = sanitizeFileName(file.name);
+        const filePath = `${user.id}/${Date.now()}_${sanitizedFileName}`;
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from('article-documents')
           .upload(filePath, file);
