@@ -20,8 +20,9 @@ export async function parseDocument(file: File): Promise<string> {
 async function parsePDF(file: File): Promise<string> {
   const pdfParse = await import('pdf-parse');
   const arrayBuffer = await file.arrayBuffer();
-  const buffer = Buffer.from(arrayBuffer);
-  const data = await (pdfParse as any).default(buffer);
+  // Converter ArrayBuffer para Uint8Array que funciona no navegador
+  const uint8Array = new Uint8Array(arrayBuffer);
+  const data = await (pdfParse as any).default(uint8Array);
   return data.text;
 }
 
