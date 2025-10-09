@@ -16,7 +16,8 @@ import {
   Heading1, Heading2, Heading3,
   Link as LinkIcon,
   Table as TableIcon,
-  AlignLeft, AlignCenter, AlignJustify
+  AlignLeft, AlignCenter, AlignJustify,
+  Quote
 } from 'lucide-react';
 import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
@@ -69,7 +70,7 @@ export function RichTextEditor({
     editorProps: {
       attributes: {
         class: cn(
-          'prose prose-sm max-w-none focus:outline-none min-h-[' + minHeight + '] p-4 prose-table:border-collapse prose-td:border prose-td:p-2 prose-th:border prose-th:p-2 prose-th:bg-muted',
+          'prose prose-sm max-w-none focus:outline-none min-h-[' + minHeight + '] p-4 prose-table:border-collapse prose-td:border prose-td:p-2 prose-th:border prose-th:p-2 prose-th:bg-muted prose-blockquote:border-l-4 prose-blockquote:border-primary prose-blockquote:pl-4 prose-blockquote:italic prose-blockquote:text-muted-foreground',
           className
         ),
       },
@@ -185,6 +186,15 @@ export function RichTextEditor({
           className="h-8 px-2"
         >
           <ListOrdered className="h-4 w-4" />
+        </Button>
+        <Button
+          type="button"
+          size="sm"
+          variant={editor.isActive('blockquote') ? 'secondary' : 'ghost'}
+          onClick={() => editor.chain().focus().toggleBlockquote().run()}
+          className="h-8 px-2"
+        >
+          <Quote className="h-4 w-4" />
         </Button>
 
         <div className="w-px h-6 bg-border mx-1" />
