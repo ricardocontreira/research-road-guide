@@ -1,132 +1,159 @@
-import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
 serve(async (req) => {
-  // Handle CORS preflight requests
-  if (req.method === 'OPTIONS') {
+  if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
     const { input, language } = await req.json();
-    const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
     
-    if (!openAIApiKey) {
-      throw new Error('OPENAI_API_KEY não configurada no Supabase');
+    console.log("Gerando resumo em:", language);
+
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    if (!LOVABLE_API_KEY) {
+      throw new Error("LOVABLE_API_KEY não configurada");
     }
 
-    // Função auxiliar para gerar resumo em um idioma específico
-    async function generateInLanguage(lang: 'Português' | 'Inglês'): Promise<string> {
+    const generateInLanguage = async (lang: 'Português' | 'Inglês'): Promise<string> => {
       const systemPrompt = lang === 'Português'
-        ? 'Você é um assistente especializado em redação científica acadêmica. Sua tarefa é gerar resumos (abstracts) para artigos científicos seguindo rigorosamente as normas da ABNT NBR 6028:2021. O resumo deve ter entre 150 e 500 palavras, ser escrito em parágrafo único, tempo verbal no passado ou presente, e conter: contextualização, objetivos, metodologia, principais resultados e conclusões. Não use citações bibliográficas.'
-        : 'You are a specialized assistant in academic scientific writing. Your task is to generate abstracts for scientific papers following rigorous academic standards. The abstract should be between 150 and 500 words, written in a single paragraph, using past or present tense, and contain: contextualization, objectives, methodology, main results and conclusions. Do not use bibliographic citations.';
+        ? `Você é um especialista em redação acadêmica brasileira. Gere um resumo (abstract) acadêmico em português seguindo as normas ABNT.
+
+REQUISITOS:
+- Máximo de 500 palavras
+- Estrutura: Contexto → Objetivo → Metodologia → Resultados → Conclusão
+- Use linguagem formal e objetiva
+- Foco em verbos no passado e presente
+- Sem referências bibliográficas
+- Texto corrido, sem parágrafos separados`
+        : `You are an expert in academic writing. Generate an academic abstract in English following international standards.
+
+REQUIREMENTS:
+- Maximum 500 words
+- Structure: Background → Objective → Methodology → Results → Conclusion
+- Use formal and objective language
+- Focus on past and present tense verbs
+- No bibliographic references
+- Continuous text, no separate paragraphs`;
 
       const userPrompt = lang === 'Português'
-        ? `Gere um resumo acadêmico em português para o seguinte artigo da área de ${input.area}:
+        ? `Com base nas informações abaixo, escreva um resumo acadêmico completo em português:
 
-TÍTULO: ${input.title}
+**Título:** ${input.title}
+**Área:** ${input.area}
+**Premissa:** ${input.premise}
 
-PREMISSA: ${input.premise}
+**Objetivos:**
+${input.objectives}
 
-OBJETIVOS: ${input.objectives}
+**Introdução:**
+${input.introduction}
 
-INTRODUÇÃO: ${input.introduction}
+**Metodologia:**
+${input.methodology}
 
-METODOLOGIA: ${input.methodology}
+**Resultados:**
+${input.results}
 
-RESULTADOS: ${input.results}
+Gere um resumo acadêmico coeso e bem estruturado, com no máximo 500 palavras.`
+        : `Based on the information below, write a complete academic abstract in English:
 
-Gere um resumo completo, coeso e acadêmico seguindo todas as diretrizes.`
-        : `Generate an academic abstract in English for the following article in the field of ${input.area}:
+**Title:** ${input.title}
+**Area:** ${input.area}
+**Premise:** ${input.premise}
 
-TITLE: ${input.title}
+**Objectives:**
+${input.objectives}
 
-PREMISE: ${input.premise}
+**Introduction:**
+${input.introduction}
 
-OBJECTIVES: ${input.objectives}
+**Methodology:**
+${input.methodology}
 
-INTRODUCTION: ${input.introduction}
+**Results:**
+${input.results}
 
-METHODOLOGY: ${input.methodology}
+Generate a cohesive and well-structured academic abstract, with a maximum of 500 words.`;
 
-RESULTS: ${input.results}
+      console.log(`Chamando Lovable AI para ${lang}...`);
 
-Generate a complete, cohesive and academic abstract following all guidelines.`;
-
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
+      const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
         headers: {
-          'Authorization': `Bearer ${openAIApiKey}`,
-          'Content-Type': 'application/json',
+          "Authorization": `Bearer ${LOVABLE_API_KEY}`,
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: 'gpt-4o-mini',
+          model: "google/gemini-2.5-flash",
           messages: [
-            { role: 'system', content: systemPrompt },
-            { role: 'user', content: userPrompt }
+            { role: "system", content: systemPrompt },
+            { role: "user", content: userPrompt }
           ],
           temperature: 0.7,
-          max_tokens: 800
+          max_tokens: 1000,
         }),
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        console.error('OpenAI API error:', errorData);
-        throw new Error(errorData.error?.message || 'Erro ao chamar API OpenAI');
+        const errorText = await response.text();
+        console.error(`Erro da Lovable AI (${lang}):`, response.status, errorText);
+        
+        if (response.status === 429) {
+          throw new Error("Limite de requisições excedido. Tente novamente em alguns instantes.");
+        }
+        if (response.status === 402) {
+          throw new Error("Créditos insuficientes no Lovable AI. Adicione créditos ao workspace.");
+        }
+        
+        throw new Error(`Erro ao gerar resumo: ${response.status}`);
       }
 
       const data = await response.json();
-      const generatedText = data.choices[0]?.message?.content;
+      const content = data.choices?.[0]?.message?.content;
       
-      if (!generatedText) {
-        throw new Error('Resposta vazia da API do OpenAI');
+      if (!content) {
+        throw new Error("Resposta vazia da IA");
       }
 
-      return generatedText.trim();
-    }
+      console.log(`Resumo gerado em ${lang}:`, content.substring(0, 100) + "...");
+      return content;
+    };
 
-    // Executar geração conforme idioma selecionado
     let resumoPT: string | undefined;
     let resumoEN: string | undefined;
 
-    if (language === 'Ambos') {
-      [resumoPT, resumoEN] = await Promise.all([
-        generateInLanguage('Português'),
-        generateInLanguage('Inglês')
-      ]);
-    } else if (language === 'Português') {
+    if (language === 'Português' || language === 'Ambos') {
       resumoPT = await generateInLanguage('Português');
-    } else {
+    }
+
+    if (language === 'Inglês' || language === 'Ambos') {
       resumoEN = await generateInLanguage('Inglês');
     }
 
     return new Response(
       JSON.stringify({ resumoPT, resumoEN }),
       { 
-        headers: { 
-          ...corsHeaders, 
-          'Content-Type': 'application/json' 
-        } 
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200 
       }
     );
+
   } catch (error) {
-    console.error('Erro na generate-abstract:', error);
+    console.error("Erro na generate-abstract:", error);
+    
     return new Response(
       JSON.stringify({ 
-        error: error instanceof Error ? error.message : 'Erro desconhecido' 
+        error: error instanceof Error ? error.message : "Erro desconhecido ao gerar resumo" 
       }),
       { 
-        status: 500, 
-        headers: { 
-          ...corsHeaders, 
-          'Content-Type': 'application/json' 
-        } 
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 500 
       }
     );
   }
