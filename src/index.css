@@ -8,7 +8,7 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    /* Escritor.AI Design System */
+    /* Revisor.AI Design System */
     --background: 220 13% 98%; /* #F9FAFB - Branco Gelo */
     --foreground: 220 26% 9%; /* #111827 - Preto Grafite */
 
@@ -48,7 +48,7 @@ All colors MUST be HSL.
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 221 83% 32%;
 
-    /* Custom Escritor.AI tokens */
+    /* Custom Revisor.AI tokens */
     --highlight: 45 97% 64%;
     --highlight-bg: 45 97% 64% / 0.2;
   }

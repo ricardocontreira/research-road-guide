@@ -25,7 +25,7 @@ export default function Login() {
       await login(email, password);
       toast({
         title: "Login realizado com sucesso!",
-        description: "Bem-vindo ao Escritor.AI",
+        description: "Bem-vindo ao Revisor.AI",
       });
       navigate("/dashboard");
     } catch (error) {
@@ -47,7 +47,7 @@ export default function Login() {
             <div className="bg-primary rounded-full p-3 mb-4">
               <BookOpen className="w-8 h-8 text-primary-foreground" />
             </div>
-            <h1 className="text-2xl font-semibold text-foreground">Escritor.AI</h1>
+            <h1 className="text-2xl font-semibold text-foreground">Revisor.AI</h1>
             <p className="text-muted-foreground text-sm mt-2">
               Faça login para continuar
             </p>

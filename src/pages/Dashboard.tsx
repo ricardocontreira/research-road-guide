@@ -61,8 +61,8 @@ export default function Dashboard() {
               <BookOpen className="w-6 h-6 text-primary-foreground" />
             </div>
             <div>
-              <h1 className="text-xl font-semibold text-foreground">Escritor.AI</h1>
-              <p className="text-xs text-muted-foreground">Plataforma de escrita acadêmica</p>
+            <h1 className="text-xl font-semibold text-foreground">Revisor.AI</h1>
+            <p className="text-xs text-muted-foreground">Plataforma inteligente de revisão acadêmica</p>
             </div>
           </div>
           <div className="flex items-center gap-4">

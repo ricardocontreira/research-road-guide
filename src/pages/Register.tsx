@@ -53,7 +53,7 @@ export default function Register() {
       await register(name, email, password);
       toast({
         title: "Conta criada com sucesso!",
-        description: "Bem-vindo ao Escritor.AI. Vamos começar sua jornada acadêmica.",
+        description: "Bem-vindo ao Revisor.AI. Vamos começar sua jornada de revisão acadêmica.",
       });
       navigate("/dashboard");
     } catch (error) {
