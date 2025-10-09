@@ -23,6 +23,7 @@ interface ProjectContextType {
   currentProject: Project | null;
   createProject: (title: string, premise: string, area: string) => Promise<void>;
   updateProject: (id: string, updates: Partial<Project>) => Promise<void>;
+  deleteProject: (id: string) => Promise<void>;
   setCurrentProject: (project: Project | null) => void;
   getProjectProgress: (project: Project) => number;
   loadProjects: (userId: string) => Promise<void>;
@@ -176,6 +177,35 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const deleteProject = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('projects')
+        .delete()
+        .eq('id', id);
+      
+      if (error) throw error;
+      
+      setProjects(projects.filter(p => p.id !== id));
+      
+      if (currentProject?.id === id) {
+        setCurrentProject(null);
+      }
+      
+      toast({
+        title: "Projeto deletado",
+        description: "Seu projeto foi removido com sucesso.",
+      });
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Erro ao deletar projeto",
+        description: error.message,
+      });
+      throw error;
+    }
+  };
+
   const getProjectProgress = (project: Project): number => {
     let completed = 0;
     let total = 6;
@@ -197,6 +227,7 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
         currentProject,
         createProject,
         updateProject,
+        deleteProject,
         setCurrentProject,
         getProjectProgress,
         loadProjects,

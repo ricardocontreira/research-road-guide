@@ -24,7 +24,7 @@ const areas = [
 
 export default function Dashboard() {
   const { user, logout } = useAuth();
-  const { projects, createProject, setCurrentProject } = useProject();
+  const { projects, createProject, deleteProject, setCurrentProject } = useProject();
   const navigate = useNavigate();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [newProject, setNewProject] = useState({
@@ -40,6 +40,10 @@ export default function Dashboard() {
       setNewProject({ title: "", premise: "", area: "" });
       navigate("/project/editor");
     }
+  };
+
+  const handleDeleteProject = async (id: string) => {
+    await deleteProject(id);
   };
 
   const handleLogout = () => {
@@ -183,6 +187,7 @@ export default function Dashboard() {
                   setCurrentProject(project);
                   navigate("/project/editor");
                 }}
+                onDelete={handleDeleteProject}
               />
             ))}
           </div>
