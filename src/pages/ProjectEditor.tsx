@@ -314,6 +314,30 @@ export default function ProjectEditor() {
     return (currentProject?.[section] as string) || "";
   };
 
+  // Função de navegação que salva antes de trocar de seção
+  const navigateTo = async (section: Section) => {
+    // Se estiver em uma seção editável e houver conteúdo não salvo, salvar primeiro
+    if (
+      (currentSection === "introduction" || currentSection === "methodology" || currentSection === "results") &&
+      content !== ((currentProject?.[currentSection] as string) || "")
+    ) {
+      await handleSaveNow();
+    }
+    setCurrentSection(section);
+  };
+
+  const handleSaveNow = async () => {
+    if (!currentProject || currentSection === "abstract") return;
+    
+    setIsSaving(true);
+    const projectKey = currentSection as keyof typeof currentProject;
+    if (typeof currentProject[projectKey] === 'string' && content !== currentProject[projectKey]) {
+      await updateProject(currentProject.id, { [currentSection]: content });
+      setLastSaved(new Date());
+    }
+    setIsSaving(false);
+  };
+
   useEffect(() => {
     if (!currentProject) {
       navigate("/dashboard");
@@ -414,32 +438,20 @@ export default function ProjectEditor() {
 
   const wordCount = getWordCountFromHtml(content);
 
-  const handleSaveNow = async () => {
-    if (!currentProject || currentSection === "abstract") return;
-    
-    setIsSaving(true);
-    const projectKey = currentSection as keyof typeof currentProject;
-    if (typeof currentProject[projectKey] === 'string' && content !== currentProject[projectKey]) {
-      await updateProject(currentProject.id, { [currentSection]: content });
-      setLastSaved(new Date());
-    }
-    setIsSaving(false);
-  };
-
   return (
     <div className="min-h-screen bg-background flex">
       {/* Sidebar de Progresso */}
-      <ProgressSidebar
-        project={currentProject}
-        currentSection={currentSection}
-        sectionContents={{
-          introduction: getSectionContent("introduction"),
-          methodology: getSectionContent("methodology"),
-          results: getSectionContent("results"),
-        }}
-        isSaving={isSaving}
-        onSectionChange={setCurrentSection}
-      />
+        <ProgressSidebar
+          project={currentProject}
+          currentSection={currentSection}
+          sectionContents={{
+            introduction: getSectionContent("introduction"),
+            methodology: getSectionContent("methodology"),
+            results: getSectionContent("results"),
+          }}
+          isSaving={isSaving}
+          onSectionChange={navigateTo}
+        />
 
       {/* Área Principal */}
       <div className="flex-1 flex flex-col">
@@ -553,7 +565,7 @@ export default function ProjectEditor() {
                       </p>
                     </div>
                     <Button 
-                      onClick={() => setCurrentSection(getNextSection(currentSection)!)}
+                      onClick={() => navigateTo(getNextSection(currentSection)!)}
                       size="lg"
                     >
                       Continuar

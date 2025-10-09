@@ -55,11 +55,11 @@ export default function ProgressSidebar({
       case "abstract":
         return !!(project.abstractPT || project.abstractEN);
       case "introduction":
-        return getWordCountFromHtml(sectionContents.introduction) >= 300;
+        return getWordCountFromHtml(sectionContents.introduction) >= 200;
       case "methodology":
-        return getWordCountFromHtml(sectionContents.methodology) >= 300;
+        return getWordCountFromHtml(sectionContents.methodology) >= 150;
       case "results":
-        return getWordCountFromHtml(sectionContents.results) >= 300;
+        return getWordCountFromHtml(sectionContents.results) >= 150;
       default:
         return false;
     }
