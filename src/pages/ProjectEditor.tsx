@@ -333,61 +333,59 @@ function ConfigSection({ project, onUpdate }: ConfigSectionProps) {
   }, [title, premise, area, project, onUpdate]);
 
   return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Configuração do Projeto</CardTitle>
-          <CardDescription>
-            Defina as informações básicas do seu artigo acadêmico
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Título do Projeto</label>
-            <input
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Ex: Impactos da Inteligência Artificial na Educação Superior"
-              maxLength={150}
-              className="w-full px-3 py-2 border border-border rounded-md bg-background"
-            />
-            <p className="text-xs text-muted-foreground text-right">
-              {title.length}/150 caracteres
-            </p>
-          </div>
+    <Card>
+      <CardHeader>
+        <CardTitle>Configuração do Projeto</CardTitle>
+        <CardDescription>
+          Defina as informações básicas do seu artigo acadêmico
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Título do Projeto</label>
+          <input
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="Ex: Impactos da Inteligência Artificial na Educação Superior"
+            maxLength={150}
+            className="w-full px-3 py-2 border border-border rounded-md bg-background"
+          />
+          <p className="text-xs text-muted-foreground text-right">
+            {title.length}/150 caracteres
+          </p>
+        </div>
 
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Premissa da Pesquisa</label>
-            <Textarea
-              value={premise}
-              onChange={(e) => setPremise(e.target.value)}
-              placeholder="Descreva brevemente a questão central ou hipótese da sua pesquisa..."
-              rows={6}
-            />
-            <p className="text-xs text-muted-foreground text-right">
-              {premise.split(/\s+/).filter(Boolean).length} palavras
-            </p>
-          </div>
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Premissa da Pesquisa</label>
+          <Textarea
+            value={premise}
+            onChange={(e) => setPremise(e.target.value)}
+            placeholder="Descreva brevemente a questão central ou hipótese da sua pesquisa..."
+            rows={6}
+          />
+          <p className="text-xs text-muted-foreground text-right">
+            {premise.split(/\s+/).filter(Boolean).length} palavras
+          </p>
+        </div>
 
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Área do Projeto</label>
-            <Select value={area} onValueChange={setArea}>
-              <SelectTrigger>
-                <SelectValue placeholder="Selecione uma área" />
-              </SelectTrigger>
-              <SelectContent>
-                {areas.map((areaOption) => (
-                  <SelectItem key={areaOption} value={areaOption}>
-                    {areaOption}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Área do Projeto</label>
+          <Select value={area} onValueChange={setArea}>
+            <SelectTrigger>
+              <SelectValue placeholder="Selecione uma área" />
+            </SelectTrigger>
+            <SelectContent>
+              {areas.map((areaOption) => (
+                <SelectItem key={areaOption} value={areaOption}>
+                  {areaOption}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
 
