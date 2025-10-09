@@ -475,7 +475,12 @@ export default function ProjectEditor() {
 
         {/* Conteúdo */}
         <div className="flex-1 overflow-y-auto">
-          <div className="max-w-[800px] mx-auto px-6 py-12">
+              <div className={cn(
+                "mx-auto px-4 py-6 transition-all duration-300",
+                isProgressSidebarOpen && isSuggestionPanelOpen && "max-w-[1200px]",
+                (isProgressSidebarOpen && !isSuggestionPanelOpen) || (!isProgressSidebarOpen && isSuggestionPanelOpen) ? "max-w-[1600px]" : "",
+                !isProgressSidebarOpen && !isSuggestionPanelOpen && "max-w-none px-12"
+              )}>
             <div className="mb-6">
               <h2 className="text-2xl font-semibold text-foreground mb-2">
                 {sectionLabels[currentSection]}
