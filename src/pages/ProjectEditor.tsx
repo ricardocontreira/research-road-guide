@@ -6,7 +6,7 @@ import ProgressSidebar from "@/components/ProgressSidebar";
 import SuggestionPanel from "@/components/SuggestionPanel";
 import { Button } from "@/components/ui/button";
 import { RichTextEditor } from "@/components/RichTextEditor";
-import { ArrowLeft, FileDown, ArrowRight, Sparkles, Loader2, Check, AlertCircle, ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowLeft, FileDown, ArrowRight, Sparkles, Loader2, Check, AlertCircle, PanelLeft, PanelLeftClose, PanelRight, PanelRightClose } from "lucide-react";
 import { getWordCountFromHtml } from "@/utils/wordCount";
 import { generateAbstract } from "@/services/ai";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -422,21 +422,31 @@ export default function ProjectEditor() {
         }} isSaving={isSaving} onSectionChange={navigateTo} />
       </div>
 
-      {/* Botão de Toggle da Progress Sidebar */}
-      <Button variant="ghost" size="icon" className={cn("fixed top-1/2 -translate-y-1/2 z-20 h-12 w-8 rounded-l-none shadow-md", isProgressSidebarOpen ? "left-64" : "left-0")} onClick={() => setIsProgressSidebarOpen(!isProgressSidebarOpen)}>
-        {isProgressSidebarOpen ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-      </Button>
 
       {/* Conteúdo Principal */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Header */}
         <header className="border-b border-border bg-card sticky top-0 z-10">
           <div className="px-6 py-4 flex items-center justify-between">
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setIsProgressSidebarOpen(!isProgressSidebarOpen)}
+                className="h-9 w-9"
+              >
+                {isProgressSidebarOpen ? (
+                  <PanelLeftClose className="h-4 w-4" />
+                ) : (
+                  <PanelLeft className="h-4 w-4" />
+                )}
+              </Button>
+              
               <Button variant="ghost" size="sm" onClick={() => navigate("/dashboard")}>
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Voltar
               </Button>
+              
               <div>
                 <h1 className="text-lg font-semibold text-foreground line-clamp-1">
                   {currentProject.title}
@@ -466,6 +476,22 @@ export default function ProjectEditor() {
                 <FileDown className="w-4 h-4 mr-2" />
                 Exportar
               </Button>
+              
+              {currentSection !== "abstract" && currentSection !== "config" && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setIsSuggestionPanelOpen(!isSuggestionPanelOpen)}
+                  className="h-9 w-9"
+                >
+                  {isSuggestionPanelOpen ? (
+                    <PanelRightClose className="h-4 w-4" />
+                  ) : (
+                    <PanelRight className="h-4 w-4" />
+                  )}
+                </Button>
+              )}
+              
               <div className="bg-primary text-primary-foreground rounded-full w-8 h-8 flex items-center justify-center font-semibold text-sm">
                 {user?.name.charAt(0).toUpperCase()}
               </div>
@@ -528,10 +554,6 @@ export default function ProjectEditor() {
         </div>
       </div>
 
-      {/* Botão de Toggle do Suggestion Panel (Condicional) */}
-      {currentSection !== "abstract" && currentSection !== "config" && <Button variant="ghost" size="icon" className={cn("fixed top-1/2 -translate-y-1/2 z-20 h-12 w-8 rounded-r-none shadow-md", isSuggestionPanelOpen ? "right-96" : "right-0")} onClick={() => setIsSuggestionPanelOpen(!isSuggestionPanelOpen)}>
-          {isSuggestionPanelOpen ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
-        </Button>}
 
       {/* Suggestion Panel - Colapsável (Condicional) */}
       {currentSection !== "abstract" && currentSection !== "config" && <div className={cn("transition-all duration-300 ease-in-out border-l border-border bg-card", isSuggestionPanelOpen ? "w-96" : "w-0 overflow-hidden")}>
