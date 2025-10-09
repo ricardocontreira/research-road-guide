@@ -18,12 +18,28 @@ export async function parseDocument(file: File): Promise<string> {
 }
 
 async function parsePDF(file: File): Promise<string> {
-  const pdfParse = await import('pdf-parse');
+  // Usar pdfjs-dist que funciona no navegador
+  const pdfjsLib = await import('pdfjs-dist');
+  
+  // Configurar worker
+  pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+  
   const arrayBuffer = await file.arrayBuffer();
-  // Converter ArrayBuffer para Uint8Array que funciona no navegador
-  const uint8Array = new Uint8Array(arrayBuffer);
-  const data = await (pdfParse as any).default(uint8Array);
-  return data.text;
+  const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+  
+  let fullText = '';
+  
+  // Extrair texto de todas as páginas
+  for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+    const page = await pdf.getPage(pageNum);
+    const textContent = await page.getTextContent();
+    const pageText = textContent.items
+      .map((item: any) => item.str)
+      .join(' ');
+    fullText += pageText + '\n';
+  }
+  
+  return fullText;
 }
 
 async function parseDOCX(file: File): Promise<string> {
@@ -88,3 +104,4 @@ export function validateDocument(text: string): {
     warnings
   };
 }
+
