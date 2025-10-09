@@ -18,24 +18,24 @@ export async function parseDocument(file: File): Promise<string> {
 }
 
 async function parsePDF(file: File): Promise<string> {
-  // Usar pdfjs-dist (ESM) no navegador, sem worker para evitar erros de carregamento
-  const pdfjsLib = await import('pdfjs-dist/build/pdf.mjs');
+  // PDF.js em modo sem worker para evitar erros de carregamento do worker em ambientes restritos
+  const pdfjs = await import('pdfjs-dist/build/pdf.mjs');
+  const { getDocument } = pdfjs as any;
 
   const arrayBuffer = await file.arrayBuffer();
-  const pdf = await (pdfjsLib as any).getDocument({ data: arrayBuffer, disableWorker: true }).promise;
+  const loadingTask = (getDocument as any)({ data: arrayBuffer, disableWorker: true });
+  const pdf = await loadingTask.promise;
 
   let fullText = '';
-  
-  // Extrair texto de todas as páginas
   for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
     const page = await pdf.getPage(pageNum);
     const textContent = await page.getTextContent();
-    const pageText = textContent.items
-      .map((item: any) => item.str)
+    const pageText = (textContent.items as any[])
+      .map((item: any) => (item && typeof item.str === 'string' ? item.str : ''))
       .join(' ');
     fullText += pageText + '\n';
   }
-  
+
   return fullText;
 }
 
@@ -101,4 +101,3 @@ export function validateDocument(text: string): {
     warnings
   };
 }
-
