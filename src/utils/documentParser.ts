@@ -21,8 +21,9 @@ async function parsePDF(file: File): Promise<string> {
   // Usar pdfjs-dist que funciona no navegador
   const pdfjsLib = await import('pdfjs-dist');
   
-  // Configurar worker
-  pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+  // Configurar worker usando o pacote instalado
+  const pdfjsWorker = await import('pdfjs-dist/build/pdf.worker.min.mjs?url');
+  pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker.default;
   
   const arrayBuffer = await file.arrayBuffer();
   const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
