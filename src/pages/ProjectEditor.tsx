@@ -297,6 +297,7 @@ export default function ProjectEditor() {
   const [currentSection, setCurrentSection] = useState<Section>("introduction");
   const [content, setContent] = useState("");
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     if (!currentProject) {
@@ -323,16 +324,21 @@ export default function ProjectEditor() {
     // ⚠️ CRITICAL FIX: Não salva se a seção for 'abstract'
     if (!currentProject || currentSection === "abstract") return; 
 
-    const timer = setTimeout(() => {
+    setIsSaving(true);
+    const timer = setTimeout(async () => {
       // Usando tipagem segura para evitar erros de TS e garantir que o valor não salvo seja diferente do salvo
       const projectKey = currentSection as keyof typeof currentProject;
       if (typeof currentProject[projectKey] === 'string' && content !== currentProject[projectKey]) {
-        updateProject(currentProject.id, { [currentSection]: content });
+        await updateProject(currentProject.id, { [currentSection]: content });
         setLastSaved(new Date());
       }
+      setIsSaving(false);
     }, 2000);
 
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      setIsSaving(false);
+    };
   }, [content, currentSection, currentProject, updateProject]);
 
   if (!currentProject) return null;
@@ -393,12 +399,26 @@ export default function ProjectEditor() {
 
   const wordCount = getWordCountFromHtml(content);
 
+  const handleSaveNow = async () => {
+    if (!currentProject || currentSection === "abstract") return;
+    
+    setIsSaving(true);
+    const projectKey = currentSection as keyof typeof currentProject;
+    if (typeof currentProject[projectKey] === 'string' && content !== currentProject[projectKey]) {
+      await updateProject(currentProject.id, { [currentSection]: content });
+      setLastSaved(new Date());
+    }
+    setIsSaving(false);
+  };
+
   return (
     <div className="min-h-screen bg-background flex">
       {/* Sidebar de Progresso */}
       <ProgressSidebar
         project={currentProject}
         currentSection={currentSection}
+        currentContent={content}
+        isSaving={isSaving}
         onSectionChange={setCurrentSection}
       />
 
@@ -422,6 +442,26 @@ export default function ProjectEditor() {
               </div>
             </div>
             <div className="flex items-center gap-4">
+              {currentSection !== "abstract" && (
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={handleSaveNow}
+                  disabled={isSaving}
+                >
+                  {isSaving ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Salvando...
+                    </>
+                  ) : (
+                    <>
+                      <Check className="w-4 h-4 mr-2" />
+                      Salvar Agora
+                    </>
+                  )}
+                </Button>
+              )}
               {lastSaved && (
                 <span className="text-xs text-muted-foreground">
                   Salvo às {lastSaved.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}

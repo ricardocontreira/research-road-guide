@@ -1,7 +1,8 @@
 import { Project } from "@/contexts/ProjectContext";
-import { Check, Circle, FileText } from "lucide-react";
+import { Check, Circle, FileText, Loader2, CheckCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
+import { getWordCountFromHtml } from "@/utils/wordCount";
 
 interface Step {
   id: string;
@@ -27,12 +28,16 @@ const steps: Step[] = [
 interface ProgressSidebarProps {
   project: Project;
   currentSection: "introduction" | "methodology" | "results" | "abstract";
+  currentContent: string; // Conteúdo não salvo da seção atual
+  isSaving: boolean; // Status de salvamento
   onSectionChange: (section: "introduction" | "methodology" | "results" | "abstract") => void;
 }
 
 export default function ProgressSidebar({
   project,
   currentSection,
+  currentContent,
+  isSaving,
   onSectionChange,
 }: ProgressSidebarProps) {
   const navigate = useNavigate();
@@ -46,11 +51,21 @@ export default function ProgressSidebar({
       case "abstract":
         return !!(project.abstractPT || project.abstractEN);
       case "introduction":
-        return !!project.introduction;
+        // Se for a seção atual, usa o conteúdo não salvo
+        if (stepId === currentSection) {
+          return getWordCountFromHtml(currentContent) >= 300;
+        }
+        return getWordCountFromHtml(project.introduction || "") >= 300;
       case "methodology":
-        return !!project.methodology;
+        if (stepId === currentSection) {
+          return getWordCountFromHtml(currentContent) >= 300;
+        }
+        return getWordCountFromHtml(project.methodology || "") >= 300;
       case "results":
-        return !!project.results;
+        if (stepId === currentSection) {
+          return getWordCountFromHtml(currentContent) >= 300;
+        }
+        return getWordCountFromHtml(project.results || "") >= 300;
       default:
         return false;
     }
@@ -90,7 +105,20 @@ export default function ProgressSidebar({
   return (
     <aside className="w-64 border-r border-border bg-card flex-shrink-0">
       <div className="p-6">
-        <h3 className="text-sm font-semibold text-foreground mb-4">Progresso</h3>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-sm font-semibold text-foreground">Progresso</h3>
+          {isSaving ? (
+            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+              <Loader2 className="w-3 h-3 animate-spin" />
+              <span>Salvando...</span>
+            </div>
+          ) : (
+            <div className="flex items-center gap-1 text-xs text-green-600">
+              <CheckCircle className="w-3 h-3" />
+              <span>Salvo</span>
+            </div>
+          )}
+        </div>
         <nav className="space-y-1">
           {steps.map((step, index) => {
             const isComplete = isStepComplete(step.id);

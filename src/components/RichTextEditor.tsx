@@ -40,6 +40,7 @@ export function RichTextEditor({
     extensions: [
       StarterKit.configure({
         heading: false,
+        link: false, // Desabilita link do StarterKit para usar a extensão customizada
       }),
       Heading.configure({
         levels: [1, 2, 3],
