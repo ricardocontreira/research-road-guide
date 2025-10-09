@@ -40,6 +40,15 @@ export interface AISuggestion {
   icon: "Lightbulb" | "AlertCircle" | "BookOpen";
 }
 
+export interface AiTip {
+  id: string;
+  number: number;
+  category: "Metodologia" | "Redação" | "Resultados" | "Estrutura" | "Fundamentação";
+  title: string;
+  description: string;
+  icon: "Lightbulb" | "CheckCircle" | "AlertCircle";
+}
+
 /**
  * Converte HTML para texto plano
  */
@@ -121,5 +130,30 @@ export async function getAcademicSuggestions(
   } catch (err) {
     console.error('Erro na chamada de getAcademicSuggestions:', err);
     return [];
+  }
+}
+
+/**
+ * Analisa documento e retorna 10 dicas inteligentes
+ */
+export async function analyzeDocumentForTips(
+  documentText: string,
+  area: string,
+  premise: string
+): Promise<AiTip[]> {
+  try {
+    const { data, error } = await supabase.functions.invoke('analyze-document', {
+      body: { documentText, area, premise }
+    });
+
+    if (error) {
+      console.error('Erro ao analisar documento:', error);
+      throw new Error('Não foi possível analisar o documento');
+    }
+
+    return data.tips || [];
+  } catch (err) {
+    console.error('Erro na chamada de analyzeDocumentForTips:', err);
+    throw err;
   }
 }

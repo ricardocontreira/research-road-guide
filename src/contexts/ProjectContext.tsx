@@ -2,6 +2,15 @@ import { createContext, useContext, useState, useCallback, ReactNode } from "rea
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
 
+export interface AiTip {
+  id: string;
+  number: number;
+  category: "Metodologia" | "Redação" | "Resultados" | "Estrutura" | "Fundamentação";
+  title: string;
+  description: string;
+  icon: "Lightbulb" | "CheckCircle" | "AlertCircle";
+}
+
 export interface Project {
   id: string;
   title: string;
@@ -14,6 +23,11 @@ export interface Project {
   introduction: string;
   methodology: string;
   results: string;
+  documentUrl?: string;
+  documentName?: string;
+  documentSize?: number;
+  aiTips?: AiTip[];
+  aiTipsCompleted?: Record<string, boolean>;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -60,6 +74,11 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
         introduction: p.introduction || '',
         methodology: p.methodology || '',
         results: p.results || '',
+        documentUrl: p.document_url,
+        documentName: p.document_name,
+        documentSize: p.document_size,
+        aiTips: (p.ai_tips as any) || undefined,
+        aiTipsCompleted: (p.ai_tips_completed as any) || undefined,
         createdAt: new Date(p.created_at),
         updatedAt: new Date(p.updated_at),
       }));
@@ -115,6 +134,11 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
         introduction: data.introduction || '',
         methodology: data.methodology || '',
         results: data.results || '',
+        documentUrl: data.document_url,
+        documentName: data.document_name,
+        documentSize: data.document_size,
+        aiTips: (data.ai_tips as any) || undefined,
+        aiTipsCompleted: (data.ai_tips_completed as any) || undefined,
         createdAt: new Date(data.created_at),
         updatedAt: new Date(data.updated_at),
       };
@@ -152,6 +176,11 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
       if (updates.introduction !== undefined) dbUpdates.introduction = updates.introduction;
       if (updates.methodology !== undefined) dbUpdates.methodology = updates.methodology;
       if (updates.results !== undefined) dbUpdates.results = updates.results;
+      if (updates.documentUrl !== undefined) dbUpdates.document_url = updates.documentUrl;
+      if (updates.documentName !== undefined) dbUpdates.document_name = updates.documentName;
+      if (updates.documentSize !== undefined) dbUpdates.document_size = updates.documentSize;
+      if (updates.aiTips !== undefined) dbUpdates.ai_tips = updates.aiTips;
+      if (updates.aiTipsCompleted !== undefined) dbUpdates.ai_tips_completed = updates.aiTipsCompleted;
       
       const { error } = await supabase
         .from('projects')

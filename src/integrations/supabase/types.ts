@@ -39,8 +39,13 @@ export type Database = {
         Row: {
           abstract_en: string | null
           abstract_pt: string | null
+          ai_tips: Json | null
+          ai_tips_completed: Json | null
           area: string
           created_at: string | null
+          document_name: string | null
+          document_size: number | null
+          document_url: string | null
           id: string
           introduction: string | null
           literature: string | null
@@ -55,8 +60,13 @@ export type Database = {
         Insert: {
           abstract_en?: string | null
           abstract_pt?: string | null
+          ai_tips?: Json | null
+          ai_tips_completed?: Json | null
           area: string
           created_at?: string | null
+          document_name?: string | null
+          document_size?: number | null
+          document_url?: string | null
           id?: string
           introduction?: string | null
           literature?: string | null
@@ -71,8 +81,13 @@ export type Database = {
         Update: {
           abstract_en?: string | null
           abstract_pt?: string | null
+          ai_tips?: Json | null
+          ai_tips_completed?: Json | null
           area?: string
           created_at?: string | null
+          document_name?: string | null
+          document_size?: number | null
+          document_url?: string | null
           id?: string
           introduction?: string | null
           literature?: string | null

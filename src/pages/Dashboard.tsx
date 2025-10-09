@@ -89,13 +89,23 @@ export default function Dashboard() {
               Gerencie seus artigos acadêmicos em desenvolvimento
             </p>
           </div>
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button size="lg" className="gap-2">
-                <Plus className="w-5 h-5" />
-                Novo Projeto
-              </Button>
-            </DialogTrigger>
+          <div className="flex gap-3">
+            <Button 
+              size="lg" 
+              variant="secondary"
+              className="gap-2"
+              onClick={() => navigate("/smart-article")}
+            >
+              <FileText className="w-5 h-5" />
+              Criar Artigo Inteligente
+            </Button>
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogTrigger asChild>
+                <Button size="lg" className="gap-2">
+                  <Plus className="w-5 h-5" />
+                  Novo Projeto
+                </Button>
+              </DialogTrigger>
             <DialogContent className="max-w-2xl">
               <DialogHeader>
                 <DialogTitle className="text-2xl">Criar Novo Projeto</DialogTitle>
@@ -158,7 +168,8 @@ export default function Dashboard() {
                 </Button>
               </div>
             </DialogContent>
-          </Dialog>
+            </Dialog>
+          </div>
         </div>
 
         {projects.length === 0 ? (

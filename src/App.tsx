@@ -11,6 +11,7 @@ import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import ProjectSetup from "./pages/ProjectSetup";
 import ProjectEditor from "./pages/ProjectEditor";
+import SmartArticleCreation from "./pages/SmartArticleCreation";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -53,6 +54,14 @@ const App = () => (
                 element={
                   <ProtectedRoute>
                     <ProjectEditor />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/smart-article"
+                element={
+                  <ProtectedRoute>
+                    <SmartArticleCreation />
                   </ProtectedRoute>
                 }
               />
