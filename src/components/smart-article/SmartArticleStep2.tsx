@@ -148,7 +148,7 @@ export default function SmartArticleStep2({
         <Alert>
           <Info className="h-4 w-4" />
           <AlertDescription>
-            O documento deve conter as seções: <strong>Introdução</strong>, <strong>Metodologia</strong> e <strong>Resultados</strong>
+            Recomenda-se que o documento contenha as seções: <strong>Introdução</strong>, <strong>Metodologia</strong> e <strong>Resultados</strong>
           </AlertDescription>
         </Alert>
 

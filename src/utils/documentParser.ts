@@ -64,7 +64,7 @@ export function validateDocument(text: string): {
   
   const lowercaseText = text.toLowerCase();
   
-  // Verificar seções obrigatórias
+  // Verificar seções recomendadas (agora como warnings)
   const hasIntroduction = 
     lowercaseText.includes('introdução') || 
     lowercaseText.includes('introduction');
@@ -78,25 +78,31 @@ export function validateDocument(text: string): {
     lowercaseText.includes('resultados') || 
     lowercaseText.includes('results');
   
+  // Agora são warnings, não errors
   if (!hasIntroduction) {
-    errors.push('Seção "Introdução" não encontrada');
+    warnings.push('Seção "Introdução" não encontrada (recomendada)');
   }
   
   if (!hasMethodology) {
-    errors.push('Seção "Metodologia" não encontrada');
+    warnings.push('Seção "Metodologia" não encontrada (recomendada)');
   }
   
   if (!hasResults) {
-    errors.push('Seção "Resultados" não encontrada');
+    warnings.push('Seção "Resultados" não encontrada (recomendada)');
   }
   
-  // Avisos
+  // Avisos de tamanho
   if (text.length < 1000) {
     warnings.push('Documento muito curto (menos de 1000 caracteres)');
   }
   
   if (text.length > 50000) {
     warnings.push('Documento muito longo (mais de 50.000 caracteres). Análise pode demorar.');
+  }
+  
+  // Só invalida se o documento estiver vazio ou corrompido
+  if (text.length === 0) {
+    errors.push('Documento vazio ou não foi possível extrair texto');
   }
   
   return {
