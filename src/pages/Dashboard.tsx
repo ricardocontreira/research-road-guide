@@ -92,7 +92,7 @@ export default function Dashboard() {
           <div className="flex gap-3">
             <Button 
               size="lg" 
-              variant="secondary"
+              variant="premium"
               className="gap-2"
               onClick={() => navigate("/smart-article")}
             >
